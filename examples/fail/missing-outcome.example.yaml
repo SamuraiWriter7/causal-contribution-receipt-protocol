@@ -1,0 +1,28 @@
+protocol: causal-contribution-receipt
+protocol_version: "0.1"
+
+receipt_id: ccr-fail-001
+
+contributor:
+  contributor_id: agent-reasoner-01
+  contributor_type: agent
+
+role:
+  role_type: reasoning
+  description: Produced intermediate reasoning used by the finalizer.
+
+evidence:
+  output_refs:
+    - trace://reasoning/reasoning-001
+
+  downstream_refs:
+    - trace://outputs/finalizer
+
+assessment:
+  work: 0.32
+  causal_impact: 0.61
+  necessity: 0.55
+  quality_impact: 0.68
+  evidence_strength: 0.83
+
+contribution_class: medium
