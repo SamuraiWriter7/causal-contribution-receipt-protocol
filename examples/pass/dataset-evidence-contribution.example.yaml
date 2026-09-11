@@ -1,0 +1,38 @@
+protocol: causal-contribution-receipt
+protocol_version: "0.1"
+
+receipt_id: ccr-0003
+
+outcome:
+  outcome_id: outcome-003
+  outcome_type: research_summary
+  outcome_ref: trace://outcomes/outcome-003
+
+contributor:
+  contributor_id: dataset-primary-evidence-01
+  contributor_type: dataset
+
+role:
+  role_type: evidence_provision
+  description: Provided primary evidence used to support factual claims in the final research summary.
+
+evidence:
+  input_refs:
+    - trace://datasets/source-corpus-001
+
+  output_refs:
+    - trace://evidence/verified-records-001
+
+  downstream_refs:
+    - trace://agents/researcher-01
+    - trace://agents/fact-checker-01
+    - trace://outputs/research-summary-003
+
+assessment:
+  work: 0.05
+  causal_impact: 0.77
+  necessity: 0.81
+  quality_impact: 0.84
+  evidence_strength: 0.98
+
+contribution_class: high
