@@ -1,0 +1,26 @@
+protocol: causal-contribution-receipt
+protocol_version: "0.1"
+
+receipt_id: ccr-fail-002
+
+outcome:
+  outcome_id: outcome-fail-002
+  outcome_type: generated_answer
+  outcome_ref: trace://outcomes/outcome-fail-002
+
+contributor:
+  contributor_id: agent-verifier-02
+  contributor_type: agent
+
+role:
+  role_type: source_verification
+  description: Claims to have verified sources used in the final response.
+
+assessment:
+  work: 0.14
+  causal_impact: 0.72
+  necessity: 0.66
+  quality_impact: 0.75
+  evidence_strength: 0.20
+
+contribution_class: high
