@@ -1,0 +1,49 @@
+protocol: causal-contribution-receipt
+protocol_version: "0.1"
+
+receipt_id: ccr-0001
+
+outcome:
+  outcome_id: outcome-001
+  outcome_type: generated_answer
+  outcome_ref: trace://outcomes/outcome-001
+
+contributor:
+  contributor_id: agent-source-verifier-01
+  contributor_type: agent
+
+role:
+  role_type: source_verification
+  description: Rejected an unreliable source before final integration.
+
+evidence:
+  input_refs:
+    - trace://sources/O17
+    - trace://sources/O22
+
+  output_refs:
+    - trace://decisions/reject-O22
+
+  downstream_refs:
+    - trace://agents/reasoner-C
+    - trace://outputs/finalizer
+
+assessment:
+  work: 0.12
+  causal_impact: 0.82
+  necessity: 0.74
+  quality_impact: 0.91
+  evidence_strength: 0.96
+
+counterfactual:
+  method: leave_one_out
+
+  baseline:
+    quality_score: 0.92
+
+  without_contributor:
+    quality_score: 0.67
+
+  observed_delta: 0.25
+
+contribution_class: critical
