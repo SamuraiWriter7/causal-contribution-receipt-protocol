@@ -1,0 +1,268 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Causal Contribution Receipt",
+  "description": "A machine-readable receipt for recording evidence-backed causal contribution to an outcome without directly implying attribution, entitlement, royalty, or settlement.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol",
+    "protocol_version",
+    "receipt_id",
+    "outcome",
+    "contributor",
+    "role",
+    "evidence",
+    "assessment",
+    "contribution_class"
+  ],
+  "properties": {
+    "protocol": {
+      "type": "string",
+      "const": "causal-contribution-receipt",
+      "description": "Canonical protocol identifier."
+    },
+    "protocol_version": {
+      "type": "string",
+      "const": "0.1",
+      "description": "Protocol version."
+    },
+    "receipt_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "Unique identifier for this contribution receipt."
+    },
+    "outcome": {
+      "$ref": "#/$defs/outcome"
+    },
+    "contributor": {
+      "$ref": "#/$defs/contributor"
+    },
+    "role": {
+      "$ref": "#/$defs/role"
+    },
+    "evidence": {
+      "$ref": "#/$defs/evidence"
+    },
+    "assessment": {
+      "$ref": "#/$defs/assessment"
+    },
+    "counterfactual": {
+      "$ref": "#/$defs/counterfactual"
+    },
+    "contribution_class": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low",
+        "incidental"
+      ],
+      "description": "Human-readable contribution classification. This classification does not imply payment entitlement or settlement."
+    }
+  },
+  "$defs": {
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcome_id",
+        "outcome_type",
+        "outcome_ref"
+      ],
+      "properties": {
+        "outcome_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Identifier of the outcome to which the contribution relates."
+        },
+        "outcome_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "description": "Machine-readable classification of the outcome."
+        },
+        "outcome_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "description": "Reference to the outcome or its trace record."
+        }
+      }
+    },
+    "contributor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contributor_id",
+        "contributor_type"
+      ],
+      "properties": {
+        "contributor_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Identifier of the contributor."
+        },
+        "contributor_type": {
+          "type": "string",
+          "enum": [
+            "human",
+            "agent",
+            "dataset",
+            "source",
+            "tool",
+            "service"
+          ],
+          "description": "Type of entity that contributed to the outcome."
+        }
+      }
+    },
+    "role": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role_type"
+      ],
+      "properties": {
+        "role_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "description": "Machine-readable description of the contributor's role."
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000,
+          "description": "Human-readable explanation of the contributor's role."
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "input_refs": {
+          "$ref": "#/$defs/referenceArray"
+        },
+        "output_refs": {
+          "$ref": "#/$defs/referenceArray"
+        },
+        "downstream_refs": {
+          "$ref": "#/$defs/referenceArray"
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "input_refs"
+          ]
+        },
+        {
+          "required": [
+            "output_refs"
+          ]
+        },
+        {
+          "required": [
+            "downstream_refs"
+          ]
+        }
+      ],
+      "description": "Evidence references supporting the contribution claim. At least one non-empty reference category must be present."
+    },
+    "referenceArray": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1024,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2048
+      }
+    },
+    "assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "work",
+        "causal_impact",
+        "necessity",
+        "quality_impact",
+        "evidence_strength"
+      ],
+      "properties": {
+        "work": {
+          "$ref": "#/$defs/normalizedScore"
+        },
+        "causal_impact": {
+          "$ref": "#/$defs/normalizedScore"
+        },
+        "necessity": {
+          "$ref": "#/$defs/normalizedScore"
+        },
+        "quality_impact": {
+          "$ref": "#/$defs/normalizedScore"
+        },
+        "evidence_strength": {
+          "$ref": "#/$defs/normalizedScore"
+        }
+      },
+      "description": "Independent normalized observations used to assess contribution. Work is not equivalent to contribution."
+    },
+    "normalizedScore": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "counterfactual": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "baseline",
+        "without_contributor",
+        "observed_delta"
+      ],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "leave_one_out"
+          ],
+          "description": "Counterfactual assessment method. v0.1 supports leave-one-out assessment."
+        },
+        "baseline": {
+          "$ref": "#/$defs/qualityMeasurement"
+        },
+        "without_contributor": {
+          "$ref": "#/$defs/qualityMeasurement"
+        },
+        "observed_delta": {
+          "type": "number",
+          "minimum": -1.0,
+          "maximum": 1.0,
+          "description": "Observed difference between baseline quality and quality without the contributor. This is evidence, not absolute causal truth."
+        }
+      }
+    },
+    "qualityMeasurement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quality_score"
+      ],
+      "properties": {
+        "quality_score": {
+          "$ref": "#/$defs/normalizedScore"
+        }
+      }
+    }
+  }
+}
