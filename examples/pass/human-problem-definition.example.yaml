@@ -1,0 +1,50 @@
+protocol: causal-contribution-receipt
+protocol_version: "0.1"
+
+receipt_id: ccr-0002
+
+outcome:
+  outcome_id: outcome-002
+  outcome_type: system_design
+  outcome_ref: trace://outcomes/outcome-002
+
+contributor:
+  contributor_id: human-problem-setter-01
+  contributor_type: human
+
+role:
+  role_type: problem_definition
+  description: Defined the core problem, constraints, and success criteria that shaped the downstream design process.
+
+evidence:
+  input_refs:
+    - trace://requirements/problem-context-001
+
+  output_refs:
+    - trace://decisions/problem-definition-001
+    - trace://requirements/success-criteria-001
+
+  downstream_refs:
+    - trace://agents/architecture-planner-01
+    - trace://agents/auditor-01
+    - trace://outputs/final-system-design
+
+assessment:
+  work: 0.18
+  causal_impact: 0.88
+  necessity: 0.93
+  quality_impact: 0.86
+  evidence_strength: 0.94
+
+counterfactual:
+  method: leave_one_out
+
+  baseline:
+    quality_score: 0.90
+
+  without_contributor:
+    quality_score: 0.54
+
+  observed_delta: 0.36
+
+contribution_class: critical
