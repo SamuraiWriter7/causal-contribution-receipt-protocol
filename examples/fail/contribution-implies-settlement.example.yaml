@@ -1,0 +1,51 @@
+protocol: causal-contribution-receipt
+protocol_version: "0.1"
+
+receipt_id: ccr-fail-004
+
+outcome:
+  outcome_id: outcome-fail-004
+  outcome_type: generated_answer
+  outcome_ref: trace://outcomes/outcome-fail-004
+
+contributor:
+  contributor_id: agent-auditor-04
+  contributor_type: agent
+
+role:
+  role_type: audit
+  description: Detected and corrected a critical factual error before final output.
+
+evidence:
+  input_refs:
+    - trace://outputs/pre-audit-answer-004
+
+  output_refs:
+    - trace://decisions/correction-004
+
+  downstream_refs:
+    - trace://outputs/final-answer-004
+
+assessment:
+  work: 0.09
+  causal_impact: 0.91
+  necessity: 0.89
+  quality_impact: 0.95
+  evidence_strength: 0.97
+
+counterfactual:
+  method: leave_one_out
+
+  baseline:
+    quality_score: 0.94
+
+  without_contributor:
+    quality_score: 0.51
+
+  observed_delta: 0.43
+
+contribution_class: critical
+
+settlement:
+  currency: USD
+  amount: 100
