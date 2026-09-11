@@ -1,0 +1,33 @@
+protocol: causal-contribution-receipt
+protocol_version: "0.1"
+
+receipt_id: ccr-fail-003
+
+outcome:
+  outcome_id: outcome-fail-003
+  outcome_type: system_design
+  outcome_ref: trace://outcomes/outcome-fail-003
+
+contributor:
+  contributor_id: agent-planner-03
+  contributor_type: agent
+
+role:
+  role_type: planning
+  description: Produced a planning proposal for the downstream system design.
+
+evidence:
+  output_refs:
+    - trace://plans/plan-003
+
+  downstream_refs:
+    - trace://outputs/system-design-003
+
+assessment:
+  work: 1.25
+  causal_impact: 0.70
+  necessity: 0.62
+  quality_impact: 0.73
+  evidence_strength: 0.88
+
+contribution_class: high
