@@ -1,0 +1,61 @@
+protocol: causal-contribution-interaction
+protocol_version: "0.2"
+
+interaction_id: interaction-002
+
+outcome:
+  outcome_id: outcome-102
+  outcome_type: generated_answer
+  outcome_ref: trace://outcomes/outcome-102
+
+contributors:
+  - contributor_id: agent-reasoner-primary-01
+    contributor_type: agent
+    receipt_ref: trace://contribution-receipts/ccr-0103
+
+  - contributor_id: agent-reasoner-backup-01
+    contributor_type: agent
+    receipt_ref: trace://contribution-receipts/ccr-0104
+
+interaction_type: substitutive
+
+individual_receipt_refs:
+  - trace://contribution-receipts/ccr-0103
+  - trace://contribution-receipts/ccr-0104
+
+evidence:
+  trace_refs:
+    - trace://runs/reasoner-primary-102
+    - trace://runs/reasoner-backup-102
+
+  comparison_refs:
+    - trace://counterfactuals/primary-only-102
+    - trace://counterfactuals/backup-only-102
+    - trace://counterfactuals/primary-replaced-by-backup-102
+
+  downstream_refs:
+    - trace://agents/finalizer-102
+    - trace://outputs/final-answer-102
+
+assessment:
+  joint_effect: 0.71
+  synergy: 0.03
+  dependency: 0.18
+  evidence_strength: 0.94
+
+counterfactual:
+  method: substitution_test
+
+  baseline:
+    quality_score: 0.91
+
+  comparison:
+    quality_score: 0.88
+
+  observed_delta: 0.03
+
+  comparison_description: >
+    Replaced the primary reasoning agent with the backup reasoning agent
+    while preserving the same inputs and downstream finalization path.
+    The resulting outcome quality changed only slightly, indicating that
+    the two contributors were substantially substitutable.
