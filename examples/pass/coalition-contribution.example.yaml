@@ -1,0 +1,69 @@
+protocol: causal-contribution-interaction
+protocol_version: "0.2"
+
+interaction_id: interaction-003
+
+outcome:
+  outcome_id: outcome-103
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-103
+
+contributors:
+  - contributor_id: agent-retriever-02
+    contributor_type: agent
+    receipt_ref: trace://contribution-receipts/ccr-0105
+
+  - contributor_id: agent-verifier-02
+    contributor_type: agent
+    receipt_ref: trace://contribution-receipts/ccr-0106
+
+  - contributor_id: agent-reasoner-02
+    contributor_type: agent
+    receipt_ref: trace://contribution-receipts/ccr-0107
+
+individual_receipt_refs:
+  - trace://contribution-receipts/ccr-0105
+  - trace://contribution-receipts/ccr-0106
+  - trace://contribution-receipts/ccr-0107
+
+interaction_type: synergistic
+
+evidence:
+  trace_refs:
+    - trace://runs/retrieval-103
+    - trace://runs/verification-103
+    - trace://runs/reasoning-103
+    - trace://interactions/coalition-103
+
+  comparison_refs:
+    - trace://counterfactuals/full-coalition-103
+    - trace://counterfactuals/without-retriever-verifier-reasoner-103
+
+  downstream_refs:
+    - trace://agents/integrator-103
+    - trace://agents/auditor-103
+    - trace://outputs/final-answer-103
+
+assessment:
+  joint_effect: 0.91
+  synergy: 0.67
+  dependency: 0.83
+  evidence_strength: 0.96
+
+counterfactual:
+  method: leave_group_out
+
+  baseline:
+    quality_score: 0.94
+
+  comparison:
+    quality_score: 0.39
+
+  observed_delta: 0.55
+
+  comparison_description: >
+    Removed the retrieval, verification, and reasoning coalition from the
+    evaluated execution path while preserving the remaining integration
+    and audit stages. Outcome quality decreased substantially, indicating
+    that the value emerged from the coordinated operation of the coalition
+    rather than from any single contributor alone.
