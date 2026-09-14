@@ -1,0 +1,258 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Contribution Interaction Record",
+  "description": "A machine-readable record for evidence-backed contribution interactions among two or more contributors in relation to a shared outcome.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol",
+    "protocol_version",
+    "interaction_id",
+    "outcome",
+    "contributors",
+    "interaction_type",
+    "evidence",
+    "assessment"
+  ],
+  "properties": {
+    "protocol": {
+      "type": "string",
+      "const": "causal-contribution-interaction",
+      "description": "Canonical protocol identifier for contribution interaction records."
+    },
+    "protocol_version": {
+      "type": "string",
+      "const": "0.2",
+      "description": "Protocol version."
+    },
+    "interaction_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "Unique identifier for this contribution interaction record."
+    },
+    "outcome": {
+      "$ref": "#/$defs/outcome"
+    },
+    "contributors": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/contributorRef"
+      },
+      "description": "Two or more contributors participating in the claimed interaction."
+    },
+    "interaction_type": {
+      "type": "string",
+      "enum": [
+        "complementary",
+        "redundant",
+        "synergistic",
+        "substitutive",
+        "blocking"
+      ],
+      "description": "Classification of the observed interaction among contributors."
+    },
+    "individual_receipt_refs": {
+      "$ref": "#/$defs/referenceArray",
+      "description": "Optional references to individual Causal Contribution Receipts associated with contributors in this interaction."
+    },
+    "evidence": {
+      "$ref": "#/$defs/interactionEvidence"
+    },
+    "assessment": {
+      "$ref": "#/$defs/interactionAssessment"
+    },
+    "counterfactual": {
+      "$ref": "#/$defs/interactionCounterfactual"
+    }
+  },
+  "$defs": {
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcome_id",
+        "outcome_type",
+        "outcome_ref"
+      ],
+      "properties": {
+        "outcome_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Identifier of the outcome affected by the interaction."
+        },
+        "outcome_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "description": "Machine-readable classification of the outcome."
+        },
+        "outcome_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "description": "Reference to the outcome or its trace record."
+        }
+      }
+    },
+    "contributorRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contributor_id"
+      ],
+      "properties": {
+        "contributor_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Identifier of a contributor participating in the interaction."
+        },
+        "contributor_type": {
+          "type": "string",
+          "enum": [
+            "human",
+            "agent",
+            "dataset",
+            "source",
+            "tool",
+            "service"
+          ],
+          "description": "Optional contributor type."
+        },
+        "receipt_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "description": "Optional reference to the contributor's individual contribution receipt."
+        }
+      }
+    },
+    "interactionEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trace_refs"
+      ],
+      "properties": {
+        "trace_refs": {
+          "$ref": "#/$defs/referenceArray",
+          "description": "Trace references showing the contributors participating in the claimed interaction."
+        },
+        "comparison_refs": {
+          "$ref": "#/$defs/referenceArray",
+          "description": "References to comparison, ablation, substitution, or counterfactual runs supporting the interaction claim."
+        },
+        "downstream_refs": {
+          "$ref": "#/$defs/referenceArray",
+          "description": "References to downstream processes or outputs affected by the interaction."
+        }
+      },
+      "description": "Evidence supporting the interaction claim. Interaction claims must be grounded in traceable records."
+    },
+    "interactionAssessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "joint_effect",
+        "synergy",
+        "dependency",
+        "evidence_strength"
+      ],
+      "properties": {
+        "joint_effect": {
+          "$ref": "#/$defs/normalizedScore",
+          "description": "Estimated magnitude of the joint effect of the contributors on the outcome."
+        },
+        "synergy": {
+          "$ref": "#/$defs/signedScore",
+          "description": "Estimated interaction effect beyond the contributors' independently observed effects. Positive values indicate positive synergy; negative values indicate interference or antagonistic interaction."
+        },
+        "dependency": {
+          "$ref": "#/$defs/normalizedScore",
+          "description": "Estimated degree to which the contributors depended on one another for the observed joint effect."
+        },
+        "evidence_strength": {
+          "$ref": "#/$defs/normalizedScore",
+          "description": "Strength of the evidence supporting the interaction assessment."
+        }
+      },
+      "description": "Independent observations describing the contribution interaction. These values do not directly determine attribution, entitlement, royalty, or settlement."
+    },
+    "interactionCounterfactual": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "method",
+        "baseline",
+        "comparison",
+        "observed_delta"
+      ],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "leave_group_out",
+            "pairwise_ablation",
+            "substitution_test"
+          ],
+          "description": "Counterfactual method used to evaluate the interaction."
+        },
+        "baseline": {
+          "$ref": "#/$defs/qualityMeasurement"
+        },
+        "comparison": {
+          "$ref": "#/$defs/qualityMeasurement"
+        },
+        "observed_delta": {
+          "$ref": "#/$defs/signedScore",
+          "description": "Observed quality difference between the baseline and comparison condition. This value is evidence, not absolute causal truth."
+        },
+        "comparison_description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000,
+          "description": "Human-readable description of what was removed, substituted, or otherwise changed in the comparison condition."
+        }
+      }
+    },
+    "qualityMeasurement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quality_score"
+      ],
+      "properties": {
+        "quality_score": {
+          "$ref": "#/$defs/normalizedScore"
+        }
+      }
+    },
+    "referenceArray": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1024,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2048
+      }
+    },
+    "normalizedScore": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "signedScore": {
+      "type": "number",
+      "minimum": -1.0,
+      "maximum": 1.0
+    }
+  }
+}
