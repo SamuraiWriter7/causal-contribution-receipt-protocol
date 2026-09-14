@@ -1,0 +1,61 @@
+protocol: causal-contribution-interaction
+protocol_version: "0.2"
+
+interaction_id: interaction-fail-004
+
+outcome:
+  outcome_id: outcome-fail-204
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-fail-204
+
+contributors:
+  - contributor_id: agent-retriever-fail-02
+    contributor_type: agent
+    receipt_ref: trace://contribution-receipts/ccr-fail-0201
+
+  - contributor_id: agent-verifier-fail-02
+    contributor_type: agent
+    receipt_ref: trace://contribution-receipts/ccr-fail-0202
+
+  - contributor_id: agent-reasoner-fail-02
+    contributor_type: agent
+    receipt_ref: trace://contribution-receipts/ccr-fail-0203
+
+interaction_type: synergistic
+
+evidence:
+  trace_refs:
+    - trace://runs/retrieval-fail-204
+    - trace://runs/verification-fail-204
+    - trace://runs/reasoning-fail-204
+    - trace://interactions/coalition-fail-204
+
+  comparison_refs:
+    - trace://counterfactuals/full-coalition-fail-204
+    - trace://counterfactuals/without-coalition-fail-204
+
+assessment:
+  joint_effect: 0.88
+  synergy: 0.64
+  dependency: 0.82
+  evidence_strength: 0.95
+
+counterfactual:
+  method: leave_group_out
+
+  baseline:
+    quality_score: 0.93
+
+  comparison:
+    quality_score: 0.43
+
+  observed_delta: 0.50
+
+  comparison_description: >
+    Removed the complete three-agent coalition from the execution path
+    and compared the resulting outcome quality.
+
+individual_allocation:
+  agent-retriever-fail-02: 0.20
+  agent-verifier-fail-02: 0.15
+  agent-reasoner-fail-02: 0.15
