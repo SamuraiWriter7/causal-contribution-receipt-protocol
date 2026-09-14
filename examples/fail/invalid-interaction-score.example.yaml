@@ -1,0 +1,32 @@
+protocol: causal-contribution-interaction
+protocol_version: "0.2"
+
+interaction_id: interaction-fail-003
+
+outcome:
+  outcome_id: outcome-fail-203
+  outcome_type: system_design
+  outcome_ref: trace://outcomes/outcome-fail-203
+
+contributors:
+  - contributor_id: agent-planner-fail-01
+    contributor_type: agent
+
+  - contributor_id: agent-auditor-fail-01
+    contributor_type: agent
+
+interaction_type: complementary
+
+evidence:
+  trace_refs:
+    - trace://runs/planning-fail-203
+    - trace://runs/audit-fail-203
+
+  downstream_refs:
+    - trace://outputs/system-design-fail-203
+
+assessment:
+  joint_effect: 1.27
+  synergy: 0.41
+  dependency: 0.73
+  evidence_strength: 0.91
