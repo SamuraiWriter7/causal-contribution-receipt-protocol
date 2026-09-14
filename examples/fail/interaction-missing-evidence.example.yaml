@@ -1,0 +1,24 @@
+protocol: causal-contribution-interaction
+protocol_version: "0.2"
+
+interaction_id: interaction-fail-002
+
+outcome:
+  outcome_id: outcome-fail-202
+  outcome_type: generated_answer
+  outcome_ref: trace://outcomes/outcome-fail-202
+
+contributors:
+  - contributor_id: agent-search-fail-01
+    contributor_type: agent
+
+  - contributor_id: agent-verifier-fail-01
+    contributor_type: agent
+
+interaction_type: synergistic
+
+assessment:
+  joint_effect: 0.81
+  synergy: 0.53
+  dependency: 0.72
+  evidence_strength: 0.22
