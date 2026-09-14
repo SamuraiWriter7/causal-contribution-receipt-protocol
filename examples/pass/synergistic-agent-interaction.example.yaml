@@ -1,0 +1,61 @@
+protocol: causal-contribution-interaction
+protocol_version: "0.2"
+
+interaction_id: interaction-001
+
+outcome:
+  outcome_id: outcome-101
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-101
+
+contributors:
+  - contributor_id: agent-retriever-01
+    contributor_type: agent
+    receipt_ref: trace://contribution-receipts/ccr-0101
+
+  - contributor_id: agent-verifier-01
+    contributor_type: agent
+    receipt_ref: trace://contribution-receipts/ccr-0102
+
+interaction_type: synergistic
+
+individual_receipt_refs:
+  - trace://contribution-receipts/ccr-0101
+  - trace://contribution-receipts/ccr-0102
+
+evidence:
+  trace_refs:
+    - trace://runs/retrieval-101
+    - trace://runs/verification-101
+    - trace://interactions/retrieval-verification-101
+
+  comparison_refs:
+    - trace://counterfactuals/retriever-only-101
+    - trace://counterfactuals/verifier-only-101
+    - trace://counterfactuals/retriever-plus-verifier-101
+
+  downstream_refs:
+    - trace://agents/reasoner-101
+    - trace://outputs/final-answer-101
+
+assessment:
+  joint_effect: 0.84
+  synergy: 0.58
+  dependency: 0.76
+  evidence_strength: 0.95
+
+counterfactual:
+  method: pairwise_ablation
+
+  baseline:
+    quality_score: 0.93
+
+  comparison:
+    quality_score: 0.61
+
+  observed_delta: 0.32
+
+  comparison_description: >
+    Compared the final outcome produced with both the retrieval agent
+    and verification agent active against ablation conditions where
+    their coordinated interaction was removed.
