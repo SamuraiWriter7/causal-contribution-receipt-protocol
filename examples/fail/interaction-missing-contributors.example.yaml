@@ -1,0 +1,26 @@
+protocol: causal-contribution-interaction
+protocol_version: "0.2"
+
+interaction_id: interaction-fail-001
+
+outcome:
+  outcome_id: outcome-fail-201
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-fail-201
+
+contributors:
+  - contributor_id: agent-retriever-fail-01
+    contributor_type: agent
+
+interaction_type: complementary
+
+evidence:
+  trace_refs:
+    - trace://runs/retrieval-fail-201
+    - trace://interactions/incomplete-interaction-201
+
+assessment:
+  joint_effect: 0.62
+  synergy: 0.21
+  dependency: 0.44
+  evidence_strength: 0.87
