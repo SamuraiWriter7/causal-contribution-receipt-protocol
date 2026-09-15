@@ -1,0 +1,55 @@
+protocol: causal-contribution-graph
+protocol_version: "0.3"
+
+graph_id: graph-fail-303
+
+outcome:
+  outcome_id: outcome-fail-303
+  outcome_type: generated_answer
+  outcome_ref: trace://outcomes/outcome-fail-303
+
+nodes:
+  - node_id: contributor-303
+    node_type: contributor
+    ref: trace://contributors/agent-303
+    contributor_id: agent-303
+    evidence_status: verified
+
+  - node_id: decision-303
+    node_type: decision
+    ref: trace://decisions/decision-303
+    evidence_status: verified
+
+  - node_id: outcome-fail-303
+    node_type: outcome
+    ref: trace://outcomes/outcome-fail-303
+    evidence_status: verified
+
+edges:
+  - edge_id: edge-fail-303-a
+    from: contributor-303
+    to: decision-303
+    relation: influenced
+    verification_status: verified
+    evidence_refs:
+      - trace://evidence/influence-303
+    causal_strength: 0.80
+    uncertainty: 0.10
+
+  - edge_id: edge-fail-303-b
+    from: outcome-fail-303
+    to: decision-303
+    relation: contributed_to
+    verification_status: verified
+    evidence_refs:
+      - trace://evidence/invalid-direction-303
+    causal_strength: 0.90
+    uncertainty: 0.05
+
+graph_assessment:
+  evidence_coverage: 1.0
+  uncertainty: 0.08
+  verified_edge_count: 2
+  partial_edge_count: 0
+  unresolved_edge_count: 0
+  unresolved_segment_count: 0
