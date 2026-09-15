@@ -1,0 +1,346 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Causal Contribution Graph",
+  "description": "A machine-readable graph for connecting contribution receipts, contribution interactions, evidence, decisions, contributors, and outcomes into auditable causal contribution paths.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol",
+    "protocol_version",
+    "graph_id",
+    "outcome",
+    "nodes",
+    "edges"
+  ],
+  "properties": {
+    "protocol": {
+      "type": "string",
+      "const": "causal-contribution-graph",
+      "description": "Canonical protocol identifier."
+    },
+    "protocol_version": {
+      "type": "string",
+      "const": "0.3",
+      "description": "Protocol version."
+    },
+    "graph_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "Unique identifier for this contribution graph."
+    },
+    "outcome": {
+      "$ref": "#/$defs/outcome"
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 4096,
+      "items": {
+        "$ref": "#/$defs/node"
+      },
+      "description": "Nodes participating in the contribution graph. Node identifier uniqueness is enforced by semantic validation."
+    },
+    "edges": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16384,
+      "items": {
+        "$ref": "#/$defs/edge"
+      },
+      "description": "Directed contribution relationships between graph nodes. Endpoint resolution, directional validity, and cycle detection are enforced semantically."
+    },
+    "paths": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1024,
+      "items": {
+        "$ref": "#/$defs/contributionPath"
+      },
+      "description": "Optional explicitly identified contribution paths through the graph."
+    },
+    "graph_assessment": {
+      "$ref": "#/$defs/graphAssessment"
+    }
+  },
+  "$defs": {
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcome_id",
+        "outcome_type",
+        "outcome_ref"
+      ],
+      "properties": {
+        "outcome_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Identifier of the outcome represented by this graph."
+        },
+        "outcome_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$",
+          "description": "Machine-readable classification of the outcome."
+        },
+        "outcome_ref": {
+          "$ref": "#/$defs/reference"
+        }
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "node_id",
+        "node_type",
+        "ref"
+      ],
+      "properties": {
+        "node_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Graph-local identifier for this node."
+        },
+        "node_type": {
+          "type": "string",
+          "enum": [
+            "contributor",
+            "contribution_receipt",
+            "contribution_interaction",
+            "evidence",
+            "decision",
+            "outcome",
+            "unresolved_segment"
+          ],
+          "description": "Semantic type of the graph node."
+        },
+        "ref": {
+          "$ref": "#/$defs/reference",
+          "description": "Reference to the underlying record, trace object, outcome, or explicitly unresolved segment."
+        },
+        "contributor_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Optional contributor identifier associated with the node."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Optional human-readable node label."
+        },
+        "evidence_status": {
+          "type": "string",
+          "enum": [
+            "verified",
+            "partial",
+            "unresolved"
+          ],
+          "description": "Evidence state associated with the node."
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "edge_id",
+        "from",
+        "to",
+        "relation",
+        "verification_status"
+      ],
+      "properties": {
+        "edge_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Graph-local identifier for this directed edge."
+        },
+        "from": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Source node_id. Resolution is checked semantically."
+        },
+        "to": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Destination node_id. Resolution is checked semantically."
+        },
+        "relation": {
+          "type": "string",
+          "enum": [
+            "produced",
+            "supported_by",
+            "used_by",
+            "participates_in",
+            "influenced",
+            "verified_by",
+            "blocked_by",
+            "contributed_to"
+          ],
+          "description": "Directed semantic relationship between the two graph nodes."
+        },
+        "verification_status": {
+          "type": "string",
+          "enum": [
+            "verified",
+            "partial",
+            "unresolved"
+          ],
+          "description": "Verification state of the claimed relationship."
+        },
+        "evidence_refs": {
+          "$ref": "#/$defs/referenceArray",
+          "description": "Evidence supporting this edge."
+        },
+        "causal_strength": {
+          "$ref": "#/$defs/normalizedScore",
+          "description": "Optional estimated causal strength of this relationship. This value does not imply royalty or allocation."
+        },
+        "uncertainty": {
+          "$ref": "#/$defs/normalizedScore",
+          "description": "Optional uncertainty associated with this relationship."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "verification_status": {
+                "const": "verified"
+              }
+            },
+            "required": [
+              "verification_status"
+            ]
+          },
+          "then": {
+            "required": [
+              "evidence_refs"
+            ]
+          }
+        }
+      ]
+    },
+    "contributionPath": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path_id",
+        "node_ids"
+      ],
+      "properties": {
+        "path_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Unique identifier for the contribution path."
+        },
+        "node_ids": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "description": "Ordered graph node identifiers forming the claimed contribution path."
+        },
+        "path_assessment": {
+          "$ref": "#/$defs/pathAssessment"
+        }
+      }
+    },
+    "pathAssessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "causal_strength",
+        "evidence_coverage",
+        "uncertainty"
+      ],
+      "properties": {
+        "causal_strength": {
+          "$ref": "#/$defs/normalizedScore",
+          "description": "Estimated causal strength of the complete contribution path."
+        },
+        "evidence_coverage": {
+          "$ref": "#/$defs/normalizedScore",
+          "description": "Fraction or normalized degree of the claimed path supported by evidence."
+        },
+        "uncertainty": {
+          "$ref": "#/$defs/normalizedScore",
+          "description": "Uncertainty associated with the path-level causal claim."
+        }
+      }
+    },
+    "graphAssessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_coverage",
+        "uncertainty"
+      ],
+      "properties": {
+        "evidence_coverage": {
+          "$ref": "#/$defs/normalizedScore",
+          "description": "Normalized coverage of claimed graph relationships by available evidence."
+        },
+        "uncertainty": {
+          "$ref": "#/$defs/normalizedScore",
+          "description": "Overall uncertainty associated with the graph."
+        },
+        "verified_edge_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of edges classified as verified."
+        },
+        "partial_edge_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of edges classified as partially verified."
+        },
+        "unresolved_edge_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of unresolved causal relationships."
+        },
+        "unresolved_segment_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of explicitly represented unresolved causal segments."
+        }
+      }
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048
+    },
+    "referenceArray": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1024,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/reference"
+      }
+    },
+    "normalizedScore": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    }
+  }
+}
