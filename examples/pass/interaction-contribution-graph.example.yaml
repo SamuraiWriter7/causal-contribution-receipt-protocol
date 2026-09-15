@@ -1,0 +1,175 @@
+protocol: causal-contribution-graph
+protocol_version: "0.3"
+
+graph_id: graph-002
+
+outcome:
+  outcome_id: outcome-302
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-302
+
+nodes:
+  - node_id: contributor-retriever-01
+    node_type: contributor
+    ref: trace://contributors/agent-retriever-01
+    contributor_id: agent-retriever-01
+    label: Retrieval agent
+    evidence_status: verified
+
+  - node_id: receipt-retriever-01
+    node_type: contribution_receipt
+    ref: trace://contribution-receipts/ccr-0302
+    contributor_id: agent-retriever-01
+    label: Retrieval contribution receipt
+    evidence_status: verified
+
+  - node_id: contributor-verifier-01
+    node_type: contributor
+    ref: trace://contributors/agent-verifier-01
+    contributor_id: agent-verifier-01
+    label: Verification agent
+    evidence_status: verified
+
+  - node_id: receipt-verifier-01
+    node_type: contribution_receipt
+    ref: trace://contribution-receipts/ccr-0303
+    contributor_id: agent-verifier-01
+    label: Verification contribution receipt
+    evidence_status: verified
+
+  - node_id: interaction-retrieval-verification-01
+    node_type: contribution_interaction
+    ref: trace://contribution-interactions/interaction-0301
+    label: Retrieval and verification synergy
+    evidence_status: verified
+
+  - node_id: evidence-verified-source-set-01
+    node_type: evidence
+    ref: trace://evidence/verified-source-set-302
+    label: Verified source set
+    evidence_status: verified
+
+  - node_id: decision-reasoning-02
+    node_type: decision
+    ref: trace://decisions/reasoning-decision-302
+    label: Reasoning decision based on verified evidence
+    evidence_status: verified
+
+  - node_id: outcome-302
+    node_type: outcome
+    ref: trace://outcomes/outcome-302
+    label: Final research answer
+    evidence_status: verified
+
+edges:
+  - edge_id: edge-101
+    from: contributor-retriever-01
+    to: receipt-retriever-01
+    relation: produced
+    verification_status: verified
+    evidence_refs:
+      - trace://evidence/retriever-receipt-link-302
+    causal_strength: 0.94
+    uncertainty: 0.05
+
+  - edge_id: edge-102
+    from: contributor-verifier-01
+    to: receipt-verifier-01
+    relation: produced
+    verification_status: verified
+    evidence_refs:
+      - trace://evidence/verifier-receipt-link-302
+    causal_strength: 0.95
+    uncertainty: 0.04
+
+  - edge_id: edge-103
+    from: receipt-retriever-01
+    to: interaction-retrieval-verification-01
+    relation: participates_in
+    verification_status: verified
+    evidence_refs:
+      - trace://interactions/retrieval-verification-302
+      - trace://contribution-interactions/interaction-0301
+    causal_strength: 0.87
+    uncertainty: 0.09
+
+  - edge_id: edge-104
+    from: receipt-verifier-01
+    to: interaction-retrieval-verification-01
+    relation: participates_in
+    verification_status: verified
+    evidence_refs:
+      - trace://interactions/retrieval-verification-302
+      - trace://contribution-interactions/interaction-0301
+    causal_strength: 0.90
+    uncertainty: 0.07
+
+  - edge_id: edge-105
+    from: interaction-retrieval-verification-01
+    to: evidence-verified-source-set-01
+    relation: produced
+    verification_status: verified
+    evidence_refs:
+      - trace://evidence/verified-source-set-302
+      - trace://runs/retrieval-verification-run-302
+    causal_strength: 0.91
+    uncertainty: 0.06
+
+  - edge_id: edge-106
+    from: evidence-verified-source-set-01
+    to: decision-reasoning-02
+    relation: used_by
+    verification_status: verified
+    evidence_refs:
+      - trace://runs/reasoning-run-302
+      - trace://decisions/reasoning-decision-302
+    causal_strength: 0.88
+    uncertainty: 0.08
+
+  - edge_id: edge-107
+    from: decision-reasoning-02
+    to: outcome-302
+    relation: contributed_to
+    verification_status: verified
+    evidence_refs:
+      - trace://outputs/final-research-answer-302
+      - trace://decisions/reasoning-decision-302
+    causal_strength: 0.92
+    uncertainty: 0.05
+
+paths:
+  - path_id: path-retriever-302
+    node_ids:
+      - contributor-retriever-01
+      - receipt-retriever-01
+      - interaction-retrieval-verification-01
+      - evidence-verified-source-set-01
+      - decision-reasoning-02
+      - outcome-302
+
+    path_assessment:
+      causal_strength: 0.86
+      evidence_coverage: 1.0
+      uncertainty: 0.10
+
+  - path_id: path-verifier-302
+    node_ids:
+      - contributor-verifier-01
+      - receipt-verifier-01
+      - interaction-retrieval-verification-01
+      - evidence-verified-source-set-01
+      - decision-reasoning-02
+      - outcome-302
+
+    path_assessment:
+      causal_strength: 0.89
+      evidence_coverage: 1.0
+      uncertainty: 0.08
+
+graph_assessment:
+  evidence_coverage: 1.0
+  uncertainty: 0.07
+  verified_edge_count: 7
+  partial_edge_count: 0
+  unresolved_edge_count: 0
+  unresolved_segment_count: 0
