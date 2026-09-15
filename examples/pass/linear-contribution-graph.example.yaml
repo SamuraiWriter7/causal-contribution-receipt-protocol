@@ -1,0 +1,107 @@
+protocol: causal-contribution-graph
+protocol_version: "0.3"
+
+graph_id: graph-001
+
+outcome:
+  outcome_id: outcome-301
+  outcome_type: generated_answer
+  outcome_ref: trace://outcomes/outcome-301
+
+nodes:
+  - node_id: contributor-human-01
+    node_type: contributor
+    ref: trace://contributors/human-01
+    contributor_id: human-01
+    label: Human problem setter
+    evidence_status: verified
+
+  - node_id: receipt-human-01
+    node_type: contribution_receipt
+    ref: trace://contribution-receipts/ccr-0301
+    contributor_id: human-01
+    label: Problem-definition contribution receipt
+    evidence_status: verified
+
+  - node_id: evidence-problem-definition-01
+    node_type: evidence
+    ref: trace://evidence/problem-definition-301
+    label: Problem definition and constraints
+    evidence_status: verified
+
+  - node_id: decision-reasoning-01
+    node_type: decision
+    ref: trace://decisions/reasoning-decision-301
+    label: Reasoning decision based on defined constraints
+    evidence_status: verified
+
+  - node_id: outcome-301
+    node_type: outcome
+    ref: trace://outcomes/outcome-301
+    label: Final generated answer
+    evidence_status: verified
+
+edges:
+  - edge_id: edge-001
+    from: contributor-human-01
+    to: receipt-human-01
+    relation: produced
+    verification_status: verified
+    evidence_refs:
+      - trace://evidence/contributor-receipt-link-301
+    causal_strength: 0.95
+    uncertainty: 0.05
+
+  - edge_id: edge-002
+    from: receipt-human-01
+    to: evidence-problem-definition-01
+    relation: supported_by
+    verification_status: verified
+    evidence_refs:
+      - trace://evidence/problem-definition-301
+    causal_strength: 0.92
+    uncertainty: 0.06
+
+  - edge_id: edge-003
+    from: evidence-problem-definition-01
+    to: decision-reasoning-01
+    relation: used_by
+    verification_status: verified
+    evidence_refs:
+      - trace://runs/reasoning-run-301
+      - trace://decisions/reasoning-decision-301
+    causal_strength: 0.86
+    uncertainty: 0.10
+
+  - edge_id: edge-004
+    from: decision-reasoning-01
+    to: outcome-301
+    relation: contributed_to
+    verification_status: verified
+    evidence_refs:
+      - trace://outputs/final-answer-301
+      - trace://decisions/reasoning-decision-301
+    causal_strength: 0.89
+    uncertainty: 0.08
+
+paths:
+  - path_id: path-001
+    node_ids:
+      - contributor-human-01
+      - receipt-human-01
+      - evidence-problem-definition-01
+      - decision-reasoning-01
+      - outcome-301
+
+    path_assessment:
+      causal_strength: 0.88
+      evidence_coverage: 1.0
+      uncertainty: 0.09
+
+graph_assessment:
+  evidence_coverage: 1.0
+  uncertainty: 0.08
+  verified_edge_count: 4
+  partial_edge_count: 0
+  unresolved_edge_count: 0
+  unresolved_segment_count: 0
