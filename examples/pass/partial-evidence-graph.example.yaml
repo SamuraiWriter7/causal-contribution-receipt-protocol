@@ -1,0 +1,136 @@
+protocol: causal-contribution-graph
+protocol_version: "0.3"
+
+graph_id: graph-003
+
+outcome:
+  outcome_id: outcome-303
+  outcome_type: system_design
+  outcome_ref: trace://outcomes/outcome-303
+
+nodes:
+  - node_id: contributor-human-02
+    node_type: contributor
+    ref: trace://contributors/human-02
+    contributor_id: human-02
+    label: Human problem setter
+    evidence_status: verified
+
+  - node_id: receipt-human-02
+    node_type: contribution_receipt
+    ref: trace://contribution-receipts/ccr-0304
+    contributor_id: human-02
+    label: Problem-definition contribution receipt
+    evidence_status: verified
+
+  - node_id: evidence-design-constraints-01
+    node_type: evidence
+    ref: trace://evidence/design-constraints-303
+    label: Explicit design constraints
+    evidence_status: verified
+
+  - node_id: unresolved-segment-01
+    node_type: unresolved_segment
+    ref: trace://unresolved-segments/segment-303-01
+    label: Partially observed transformation between constraints and architecture decision
+    evidence_status: unresolved
+
+  - node_id: decision-architecture-03
+    node_type: decision
+    ref: trace://decisions/architecture-decision-303
+    label: Architecture selection
+    evidence_status: partial
+
+  - node_id: evidence-audit-03
+    node_type: evidence
+    ref: trace://evidence/audit-record-303
+    label: Partial audit evidence for the architecture decision
+    evidence_status: partial
+
+  - node_id: outcome-303
+    node_type: outcome
+    ref: trace://outcomes/outcome-303
+    label: Final system design
+    evidence_status: verified
+
+edges:
+  - edge_id: edge-201
+    from: contributor-human-02
+    to: receipt-human-02
+    relation: produced
+    verification_status: verified
+    evidence_refs:
+      - trace://evidence/human-receipt-link-303
+    causal_strength: 0.96
+    uncertainty: 0.04
+
+  - edge_id: edge-202
+    from: receipt-human-02
+    to: evidence-design-constraints-01
+    relation: supported_by
+    verification_status: verified
+    evidence_refs:
+      - trace://evidence/design-constraints-303
+    causal_strength: 0.93
+    uncertainty: 0.05
+
+  - edge_id: edge-203
+    from: evidence-design-constraints-01
+    to: unresolved-segment-01
+    relation: influenced
+    verification_status: partial
+    evidence_refs:
+      - trace://runs/planning-run-303
+    causal_strength: 0.71
+    uncertainty: 0.26
+
+  - edge_id: edge-204
+    from: unresolved-segment-01
+    to: decision-architecture-03
+    relation: influenced
+    verification_status: unresolved
+    uncertainty: 0.58
+
+  - edge_id: edge-205
+    from: decision-architecture-03
+    to: evidence-audit-03
+    relation: verified_by
+    verification_status: partial
+    evidence_refs:
+      - trace://evidence/audit-record-303
+    causal_strength: 0.64
+    uncertainty: 0.31
+
+  - edge_id: edge-206
+    from: decision-architecture-03
+    to: outcome-303
+    relation: contributed_to
+    verification_status: partial
+    evidence_refs:
+      - trace://outputs/system-design-303
+      - trace://decisions/architecture-decision-303
+    causal_strength: 0.78
+    uncertainty: 0.22
+
+paths:
+  - path_id: path-partial-303
+    node_ids:
+      - contributor-human-02
+      - receipt-human-02
+      - evidence-design-constraints-01
+      - unresolved-segment-01
+      - decision-architecture-03
+      - outcome-303
+
+    path_assessment:
+      causal_strength: 0.72
+      evidence_coverage: 0.67
+      uncertainty: 0.29
+
+graph_assessment:
+  evidence_coverage: 0.67
+  uncertainty: 0.28
+  verified_edge_count: 2
+  partial_edge_count: 3
+  unresolved_edge_count: 1
+  unresolved_segment_count: 1
