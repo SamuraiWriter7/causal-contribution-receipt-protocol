@@ -1,0 +1,38 @@
+protocol: causal-contribution-graph
+protocol_version: "0.3"
+
+graph_id: graph-fail-301
+
+outcome:
+  outcome_id: outcome-fail-301
+  outcome_type: generated_answer
+  outcome_ref: trace://outcomes/outcome-fail-301
+
+nodes:
+  - node_id: contributor-301
+    node_type: contributor
+    ref: trace://contributors/agent-301
+    contributor_id: agent-301
+    evidence_status: verified
+
+  - node_id: outcome-fail-301
+    node_type: outcome
+    ref: trace://outcomes/outcome-fail-301
+    evidence_status: verified
+
+edges:
+  - edge_id: edge-fail-301
+    from: contributor-301
+    to: receipt-does-not-exist
+    relation: contributed_to
+    verification_status: partial
+    causal_strength: 0.70
+    uncertainty: 0.20
+
+graph_assessment:
+  evidence_coverage: 0.50
+  uncertainty: 0.30
+  verified_edge_count: 0
+  partial_edge_count: 1
+  unresolved_edge_count: 0
+  unresolved_segment_count: 0
