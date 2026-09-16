@@ -1,0 +1,11 @@
+evidence_id: evidence-401-d
+evidence_type: outcome_evidence
+outcome_id: outcome-401
+
+outcome_ref: trace://outcomes/outcome-401
+
+source_refs:
+  - trace://contribution-interactions/interaction-0401
+  - trace://evidence/retrieval-verification-interaction-401
+
+status: finalized
