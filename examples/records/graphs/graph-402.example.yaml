@@ -1,0 +1,80 @@
+protocol: causal-contribution-graph
+protocol_version: "0.3"
+
+graph_id: graph-402
+
+outcome:
+  outcome_id: outcome-402
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-402
+
+nodes:
+  - node_id: receipt-0411
+    node_type: contribution_receipt
+    ref: trace://contribution-receipts/ccr-0411
+    contributor_id: agent-retriever-402
+    evidence_status: verified
+
+  - node_id: receipt-0412
+    node_type: contribution_receipt
+    ref: trace://contribution-receipts/ccr-0412
+    contributor_id: agent-verifier-402
+    evidence_status: verified
+
+  - node_id: receipt-0413
+    node_type: contribution_receipt
+    ref: trace://contribution-receipts/ccr-0413
+    contributor_id: agent-reasoner-402
+    evidence_status: verified
+
+  - node_id: interaction-0411
+    node_type: contribution_interaction
+    ref: trace://contribution-interactions/interaction-0411
+    evidence_status: verified
+
+  - node_id: outcome-402
+    node_type: outcome
+    ref: trace://outcomes/outcome-402
+    evidence_status: verified
+
+edges:
+  - edge_id: edge-402-a
+    from: receipt-0411
+    to: interaction-0411
+    relation: participates_in
+    verification_status: verified
+    evidence_refs:
+      - trace://evidence/retrieval-run-402
+
+  - edge_id: edge-402-b
+    from: receipt-0412
+    to: interaction-0411
+    relation: participates_in
+    verification_status: verified
+    evidence_refs:
+      - trace://evidence/verification-run-402
+
+  - edge_id: edge-402-c
+    from: receipt-0413
+    to: interaction-0411
+    relation: participates_in
+    verification_status: verified
+    evidence_refs:
+      - trace://evidence/reasoning-run-402
+
+  - edge_id: edge-402-d
+    from: interaction-0411
+    to: outcome-402
+    relation: contributed_to
+    verification_status: verified
+    evidence_refs:
+      - trace://evidence/coalition-interaction-402
+      - trace://evidence/final-research-answer-402
+
+graph_assessment:
+  evidence_coverage: 1.0
+  uncertainty: 0.04
+  verified_edge_count: 4
+  partial_edge_count: 0
+  unresolved_edge_count: 0
+  unresolved_segment_count: 0
