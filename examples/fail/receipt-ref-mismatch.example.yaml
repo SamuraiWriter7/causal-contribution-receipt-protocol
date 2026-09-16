@@ -1,0 +1,29 @@
+protocol: causal-contribution-bundle
+protocol_version: "0.4"
+
+bundle_id: bundle-fail-405
+
+graph_ref:
+  ref: trace://contribution-graphs/graph-445
+
+outcome_ref:
+  outcome_id: outcome-445
+  outcome_type: generated_answer
+  outcome_ref: trace://outcomes/outcome-445
+
+receipt_refs:
+  - ref: trace://contribution-receipts/ccr-0445
+    record_type: contribution_receipt
+    record_id: ccr-9999
+    protocol_version: "0.1"
+    contributor_id: agent-auditor-445
+    outcome_id: outcome-445
+
+interaction_refs: []
+
+evidence_refs: []
+
+bundle_assessment:
+  reference_coverage: 1.0
+  digest_coverage: 0.0
+  unresolved_reference_count: 0
