@@ -1,0 +1,21 @@
+evidence_id: evidence-402-b
+evidence_type: execution_trace
+outcome_id: outcome-402
+
+producer:
+  contributor_id: agent-verifier-402
+  contributor_type: agent
+
+action:
+  action_type: verification
+  status: completed
+
+input_refs:
+  - trace://evidence/retrieval-run-402
+
+result_refs:
+  - trace://verification-results/verified-set-402
+
+used_by:
+  - trace://contribution-receipts/ccr-0412
+  - trace://contribution-interactions/interaction-0411
