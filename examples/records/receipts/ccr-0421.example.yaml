@@ -1,0 +1,33 @@
+protocol: causal-contribution-receipt
+protocol_version: "0.1"
+
+receipt_id: ccr-0421
+
+outcome:
+  outcome_id: outcome-403
+  outcome_type: system_design
+  outcome_ref: trace://outcomes/outcome-403
+
+contributor:
+  contributor_id: human-problem-setter-403
+  contributor_type: human
+
+role:
+  role_type: problem_definition
+  description: Defined the problem, constraints, and success conditions used by the architecture process.
+
+evidence:
+  output_refs:
+    - trace://evidence/problem-definition-403
+
+  downstream_refs:
+    - trace://evidence/planning-run-403
+
+assessment:
+  work: 0.13
+  causal_impact: 0.84
+  necessity: 0.89
+  quality_impact: 0.82
+  evidence_strength: 0.94
+
+contribution_class: critical
