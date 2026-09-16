@@ -1,0 +1,30 @@
+protocol: causal-contribution-graph
+protocol_version: "0.3"
+
+graph_id: graph-446
+
+outcome:
+  outcome_id: outcome-446
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-446
+
+nodes:
+  - node_id: receipt-0446
+    node_type: contribution_receipt
+    ref: trace://contribution-receipts/ccr-0446
+    contributor_id: agent-verifier-446
+    evidence_status: verified
+
+  - node_id: outcome-446
+    node_type: outcome
+    ref: trace://outcomes/outcome-446
+    evidence_status: verified
+
+edges:
+  - edge_id: edge-446-a
+    from: receipt-0446
+    to: outcome-446
+    relation: contributed_to
+    verification_status: partial
+    causal_strength: 0.79
+    uncertainty: 0.13
