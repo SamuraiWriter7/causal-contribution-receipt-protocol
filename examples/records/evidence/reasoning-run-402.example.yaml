@@ -1,0 +1,21 @@
+evidence_id: evidence-402-c
+evidence_type: execution_trace
+outcome_id: outcome-402
+
+producer:
+  contributor_id: agent-reasoner-402
+  contributor_type: agent
+
+action:
+  action_type: reasoning
+  status: completed
+
+input_refs:
+  - trace://evidence/verification-run-402
+
+result_refs:
+  - trace://reasoning-results/reasoning-path-402
+
+used_by:
+  - trace://contribution-receipts/ccr-0413
+  - trace://contribution-interactions/interaction-0411
