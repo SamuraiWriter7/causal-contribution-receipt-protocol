@@ -1,0 +1,30 @@
+protocol: causal-contribution-receipt
+protocol_version: "0.1"
+
+receipt_id: ccr-0444
+
+outcome:
+  outcome_id: outcome-443
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-443
+
+contributor:
+  contributor_id: agent-verifier-443
+  contributor_type: agent
+
+role:
+  role_type: verification
+  description: Verified candidate evidence.
+
+evidence:
+  output_refs:
+    - trace://evidence/verification-443
+
+assessment:
+  work: 0.13
+  causal_impact: 0.72
+  necessity: 0.66
+  quality_impact: 0.81
+  evidence_strength: 0.92
+
+contribution_class: high
