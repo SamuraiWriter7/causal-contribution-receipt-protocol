@@ -7,7 +7,7 @@ graph_ref:
   ref: trace://contribution-graphs/graph-403
   digest:
     algorithm: sha256
-    value: "4567890123abcdef4567890123abcdef4567890123abcdef4567890123abcdef"
+    value: "c451d2b7cebbf11fd2daf7001f1052df05c5d76c24e37448da45f60fd8d9921f"
 
 outcome_ref:
   outcome_id: outcome-403
@@ -23,7 +23,7 @@ receipt_refs:
     outcome_id: outcome-403
     digest:
       algorithm: sha256
-      value: "5678901234abcdef5678901234abcdef5678901234abcdef5678901234abcdef"
+      value: "90de2184ad4e63cc17e3ac09c38423d87ff9ff0f9ea0b52b687f0e07e0c30e6b"
 
   - ref: trace://contribution-receipts/ccr-0422
     record_type: contribution_receipt
@@ -40,14 +40,14 @@ evidence_refs:
     evidence_type: requirement_trace
     digest:
       algorithm: sha256
-      value: "6789012345abcdef6789012345abcdef6789012345abcdef6789012345abcdef"
+      value: "6869610d7923cc6792ebda6106e471b97ea5a91e55c09beacada7652f4337e2a"
 
   - ref: trace://evidence/architecture-decision-403
     evidence_id: evidence-403-b
     evidence_type: decision_trace
     digest:
       algorithm: sha256
-      value: "7890123456abcdef7890123456abcdef7890123456abcdef7890123456abcdef"
+      value: "4f2545e2131ebd7dd5ad2b27dac2ac1c6928fbc21d8a38920bce37b71f376434"
 
   - ref: trace://evidence/planning-run-403
     evidence_id: evidence-403-c
