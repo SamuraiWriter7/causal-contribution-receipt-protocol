@@ -1,0 +1,18 @@
+evidence_id: evidence-401-c
+evidence_type: interaction_trace
+outcome_id: outcome-401
+
+interaction_id: interaction-0401
+
+participants:
+  - contributor_id: agent-retriever-401
+  - contributor_id: agent-verifier-401
+
+input_refs:
+  - trace://evidence/retrieval-run-401
+  - trace://evidence/verification-run-401
+
+result_refs:
+  - trace://interaction-results/verified-evidence-401
+
+status: completed
