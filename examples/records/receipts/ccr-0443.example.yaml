@@ -1,0 +1,30 @@
+protocol: causal-contribution-receipt
+protocol_version: "0.1"
+
+receipt_id: ccr-0443
+
+outcome:
+  outcome_id: outcome-443
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-443
+
+contributor:
+  contributor_id: agent-retriever-443
+  contributor_type: agent
+
+role:
+  role_type: retrieval
+  description: Retrieved candidate evidence.
+
+evidence:
+  output_refs:
+    - trace://evidence/retrieval-443
+
+assessment:
+  work: 0.15
+  causal_impact: 0.65
+  necessity: 0.58
+  quality_impact: 0.63
+  evidence_strength: 0.90
+
+contribution_class: high
