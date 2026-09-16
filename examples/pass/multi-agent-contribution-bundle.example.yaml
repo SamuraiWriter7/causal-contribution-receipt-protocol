@@ -1,0 +1,107 @@
+protocol: causal-contribution-bundle
+protocol_version: "0.4"
+
+bundle_id: bundle-002
+
+graph_ref:
+  ref: trace://contribution-graphs/graph-402
+  digest:
+    algorithm: sha256
+    value: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+outcome_ref:
+  outcome_id: outcome-402
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-402
+
+receipt_refs:
+  - ref: trace://contribution-receipts/ccr-0411
+    record_type: contribution_receipt
+    record_id: ccr-0411
+    protocol_version: "0.1"
+    contributor_id: agent-retriever-402
+    outcome_id: outcome-402
+    digest:
+      algorithm: sha256
+      value: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+
+  - ref: trace://contribution-receipts/ccr-0412
+    record_type: contribution_receipt
+    record_id: ccr-0412
+    protocol_version: "0.1"
+    contributor_id: agent-verifier-402
+    outcome_id: outcome-402
+    digest:
+      algorithm: sha256
+      value: "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+
+  - ref: trace://contribution-receipts/ccr-0413
+    record_type: contribution_receipt
+    record_id: ccr-0413
+    protocol_version: "0.1"
+    contributor_id: agent-reasoner-402
+    outcome_id: outcome-402
+    digest:
+      algorithm: sha256
+      value: "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+
+interaction_refs:
+  - ref: trace://contribution-interactions/interaction-0411
+    record_type: contribution_interaction
+    record_id: interaction-0411
+    protocol_version: "0.2"
+    outcome_id: outcome-402
+    digest:
+      algorithm: sha256
+      value: "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+
+evidence_refs:
+  - ref: trace://evidence/retrieval-run-402
+    evidence_id: evidence-402-a
+    evidence_type: execution_trace
+    digest:
+      algorithm: sha256
+      value: "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+
+  - ref: trace://evidence/verification-run-402
+    evidence_id: evidence-402-b
+    evidence_type: execution_trace
+    digest:
+      algorithm: sha256
+      value: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+
+  - ref: trace://evidence/reasoning-run-402
+    evidence_id: evidence-402-c
+    evidence_type: execution_trace
+    digest:
+      algorithm: sha256
+      value: "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+
+  - ref: trace://evidence/coalition-interaction-402
+    evidence_id: evidence-402-d
+    evidence_type: interaction_trace
+    digest:
+      algorithm: sha256
+      value: "2345678901abcdef2345678901abcdef2345678901abcdef2345678901abcdef"
+
+  - ref: trace://evidence/final-research-answer-402
+    evidence_id: evidence-402-e
+    evidence_type: outcome_evidence
+    digest:
+      algorithm: sha256
+      value: "3456789012abcdef3456789012abcdef3456789012abcdef3456789012abcdef"
+
+compatibility:
+  graph_versions:
+    - "0.3"
+
+  receipt_versions:
+    - "0.1"
+
+  interaction_versions:
+    - "0.2"
+
+bundle_assessment:
+  reference_coverage: 1.0
+  digest_coverage: 1.0
+  unresolved_reference_count: 0
