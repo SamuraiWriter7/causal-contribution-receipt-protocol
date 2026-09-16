@@ -1,0 +1,51 @@
+protocol: causal-contribution-graph
+protocol_version: "0.3"
+
+graph_id: graph-443
+
+outcome:
+  outcome_id: outcome-443
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-443
+
+nodes:
+  - node_id: receipt-0443
+    node_type: contribution_receipt
+    ref: trace://contribution-receipts/ccr-0443
+    contributor_id: agent-retriever-443
+    evidence_status: verified
+
+  - node_id: receipt-0444
+    node_type: contribution_receipt
+    ref: trace://contribution-receipts/ccr-0444
+    contributor_id: agent-verifier-443
+    evidence_status: verified
+
+  - node_id: interaction-0443
+    node_type: contribution_interaction
+    ref: trace://contribution-interactions/interaction-0443
+    evidence_status: partial
+
+  - node_id: outcome-443
+    node_type: outcome
+    ref: trace://outcomes/outcome-443
+    evidence_status: verified
+
+edges:
+  - edge_id: edge-443-a
+    from: receipt-0443
+    to: interaction-0443
+    relation: participates_in
+    verification_status: partial
+
+  - edge_id: edge-443-b
+    from: receipt-0444
+    to: interaction-0443
+    relation: participates_in
+    verification_status: partial
+
+  - edge_id: edge-443-c
+    from: interaction-0443
+    to: outcome-443
+    relation: contributed_to
+    verification_status: partial
