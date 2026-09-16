@@ -1,0 +1,179 @@
+records:
+
+  # ============================================================
+  # PASS BUNDLE 001
+  # consistent-contribution-bundle.example.yaml
+  # ============================================================
+
+  - ref: trace://contribution-graphs/graph-401
+    path: examples/records/graphs/graph-401.example.yaml
+
+  - ref: trace://contribution-receipts/ccr-0401
+    path: examples/records/receipts/ccr-0401.example.yaml
+
+  - ref: trace://contribution-receipts/ccr-0402
+    path: examples/records/receipts/ccr-0402.example.yaml
+
+  - ref: trace://contribution-interactions/interaction-0401
+    path: examples/records/interactions/interaction-0401.example.yaml
+
+  - ref: trace://evidence/retrieval-run-401
+    path: examples/records/evidence/retrieval-run-401.example.yaml
+
+  - ref: trace://evidence/verification-run-401
+    path: examples/records/evidence/verification-run-401.example.yaml
+
+  - ref: trace://evidence/retrieval-verification-interaction-401
+    path: examples/records/evidence/retrieval-verification-interaction-401.example.yaml
+
+  - ref: trace://evidence/final-answer-401
+    path: examples/records/evidence/final-answer-401.example.yaml
+
+
+  # ============================================================
+  # PASS BUNDLE 002
+  # multi-agent-contribution-bundle.example.yaml
+  # ============================================================
+
+  - ref: trace://contribution-graphs/graph-402
+    path: examples/records/graphs/graph-402.example.yaml
+
+  - ref: trace://contribution-receipts/ccr-0411
+    path: examples/records/receipts/ccr-0411.example.yaml
+
+  - ref: trace://contribution-receipts/ccr-0412
+    path: examples/records/receipts/ccr-0412.example.yaml
+
+  - ref: trace://contribution-receipts/ccr-0413
+    path: examples/records/receipts/ccr-0413.example.yaml
+
+  - ref: trace://contribution-interactions/interaction-0411
+    path: examples/records/interactions/interaction-0411.example.yaml
+
+  - ref: trace://evidence/retrieval-run-402
+    path: examples/records/evidence/retrieval-run-402.example.yaml
+
+  - ref: trace://evidence/verification-run-402
+    path: examples/records/evidence/verification-run-402.example.yaml
+
+  - ref: trace://evidence/reasoning-run-402
+    path: examples/records/evidence/reasoning-run-402.example.yaml
+
+  - ref: trace://evidence/coalition-interaction-402
+    path: examples/records/evidence/coalition-interaction-402.example.yaml
+
+  - ref: trace://evidence/final-research-answer-402
+    path: examples/records/evidence/final-research-answer-402.example.yaml
+
+
+  # ============================================================
+  # PASS BUNDLE 003
+  # partial-evidence-bundle.example.yaml
+  # ============================================================
+
+  - ref: trace://contribution-graphs/graph-403
+    path: examples/records/graphs/graph-403.example.yaml
+
+  - ref: trace://contribution-receipts/ccr-0421
+    path: examples/records/receipts/ccr-0421.example.yaml
+
+  - ref: trace://contribution-receipts/ccr-0422
+    path: examples/records/receipts/ccr-0422.example.yaml
+
+  - ref: trace://evidence/problem-definition-403
+    path: examples/records/evidence/problem-definition-403.example.yaml
+
+  - ref: trace://evidence/architecture-decision-403
+    path: examples/records/evidence/architecture-decision-403.example.yaml
+
+  - ref: trace://evidence/planning-run-403
+    path: examples/records/evidence/planning-run-403.example.yaml
+
+  # Intentionally NOT registered:
+  #
+  # trace://unresolved-segments/segment-403-01
+  #
+  # This preserves the v0.4 rule:
+  #
+  # partial != invalid
+  #
+  # and produces exactly one unresolved reference for bundle-003.
+
+
+  # ============================================================
+  # FAIL BUNDLE 401
+  # cross-record-outcome-mismatch.example.yaml
+  # ============================================================
+
+  - ref: trace://contribution-graphs/graph-441
+    path: examples/records/graphs/graph-441.example.yaml
+
+  - ref: trace://contribution-receipts/ccr-0441
+    path: examples/records/receipts/ccr-0441.example.yaml
+
+
+  # ============================================================
+  # FAIL BUNDLE 402
+  # cross-record-contributor-mismatch.example.yaml
+  # ============================================================
+
+  - ref: trace://contribution-graphs/graph-442
+    path: examples/records/graphs/graph-442.example.yaml
+
+  - ref: trace://contribution-receipts/ccr-0442
+    path: examples/records/receipts/ccr-0442.example.yaml
+
+
+  # ============================================================
+  # FAIL BUNDLE 403
+  # interaction-member-mismatch.example.yaml
+  # ============================================================
+
+  - ref: trace://contribution-graphs/graph-443
+    path: examples/records/graphs/graph-443.example.yaml
+
+  - ref: trace://contribution-receipts/ccr-0443
+    path: examples/records/receipts/ccr-0443.example.yaml
+
+  - ref: trace://contribution-receipts/ccr-0444
+    path: examples/records/receipts/ccr-0444.example.yaml
+
+  - ref: trace://contribution-interactions/interaction-0443
+    path: examples/records/interactions/interaction-0443.example.yaml
+
+
+  # ============================================================
+  # FAIL BUNDLE 404
+  # missing-external-record.example.yaml
+  # ============================================================
+
+  - ref: trace://contribution-graphs/graph-444
+    path: examples/records/graphs/graph-444.example.yaml
+
+  # Intentionally NOT registered:
+  #
+  # trace://contribution-receipts/ccr-does-not-exist
+
+
+  # ============================================================
+  # FAIL BUNDLE 405
+  # receipt-ref-mismatch.example.yaml
+  # ============================================================
+
+  - ref: trace://contribution-graphs/graph-445
+    path: examples/records/graphs/graph-445.example.yaml
+
+  - ref: trace://contribution-receipts/ccr-0445
+    path: examples/records/receipts/ccr-0445.example.yaml
+
+
+  # ============================================================
+  # FAIL BUNDLE 406
+  # record-digest-mismatch.example.yaml
+  # ============================================================
+
+  - ref: trace://contribution-graphs/graph-446
+    path: examples/records/graphs/graph-446.example.yaml
+
+  - ref: trace://contribution-receipts/ccr-0446
+    path: examples/records/receipts/ccr-0446.example.yaml
