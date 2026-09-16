@@ -1,0 +1,20 @@
+evidence_id: evidence-402-d
+evidence_type: interaction_trace
+outcome_id: outcome-402
+
+interaction_id: interaction-0411
+
+participants:
+  - contributor_id: agent-retriever-402
+  - contributor_id: agent-verifier-402
+  - contributor_id: agent-reasoner-402
+
+input_refs:
+  - trace://evidence/retrieval-run-402
+  - trace://evidence/verification-run-402
+  - trace://evidence/reasoning-run-402
+
+result_refs:
+  - trace://interaction-results/coalition-result-402
+
+status: completed
