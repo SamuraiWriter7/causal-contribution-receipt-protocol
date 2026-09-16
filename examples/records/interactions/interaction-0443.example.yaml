@@ -1,0 +1,34 @@
+protocol: causal-contribution-interaction
+protocol_version: "0.2"
+
+interaction_id: interaction-0443
+
+outcome:
+  outcome_id: outcome-443
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-443
+
+contributors:
+  - contributor_id: agent-retriever-443
+    contributor_type: agent
+    receipt_ref: trace://contribution-receipts/ccr-0443
+
+  - contributor_id: agent-reasoner-443
+    contributor_type: agent
+    receipt_ref: trace://contribution-receipts/ccr-0444
+
+interaction_type: synergistic
+
+individual_receipt_refs:
+  - trace://contribution-receipts/ccr-0443
+  - trace://contribution-receipts/ccr-0444
+
+evidence:
+  trace_refs:
+    - trace://evidence/interaction-443
+
+assessment:
+  joint_effect: 0.82
+  synergy: 0.55
+  dependency: 0.74
+  evidence_strength: 0.89
