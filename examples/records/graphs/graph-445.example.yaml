@@ -1,0 +1,30 @@
+protocol: causal-contribution-graph
+protocol_version: "0.3"
+
+graph_id: graph-445
+
+outcome:
+  outcome_id: outcome-445
+  outcome_type: generated_answer
+  outcome_ref: trace://outcomes/outcome-445
+
+nodes:
+  - node_id: receipt-0445
+    node_type: contribution_receipt
+    ref: trace://contribution-receipts/ccr-0445
+    contributor_id: agent-auditor-445
+    evidence_status: verified
+
+  - node_id: outcome-445
+    node_type: outcome
+    ref: trace://outcomes/outcome-445
+    evidence_status: verified
+
+edges:
+  - edge_id: edge-445-a
+    from: receipt-0445
+    to: outcome-445
+    relation: contributed_to
+    verification_status: partial
+    causal_strength: 0.83
+    uncertainty: 0.11
