@@ -1,0 +1,73 @@
+protocol: causal-contribution-bundle
+protocol_version: "0.4"
+
+bundle_id: bundle-003
+
+graph_ref:
+  ref: trace://contribution-graphs/graph-403
+  digest:
+    algorithm: sha256
+    value: "4567890123abcdef4567890123abcdef4567890123abcdef4567890123abcdef"
+
+outcome_ref:
+  outcome_id: outcome-403
+  outcome_type: system_design
+  outcome_ref: trace://outcomes/outcome-403
+
+receipt_refs:
+  - ref: trace://contribution-receipts/ccr-0421
+    record_type: contribution_receipt
+    record_id: ccr-0421
+    protocol_version: "0.1"
+    contributor_id: human-problem-setter-403
+    outcome_id: outcome-403
+    digest:
+      algorithm: sha256
+      value: "5678901234abcdef5678901234abcdef5678901234abcdef5678901234abcdef"
+
+  - ref: trace://contribution-receipts/ccr-0422
+    record_type: contribution_receipt
+    record_id: ccr-0422
+    protocol_version: "0.1"
+    contributor_id: agent-architect-403
+    outcome_id: outcome-403
+
+interaction_refs: []
+
+evidence_refs:
+  - ref: trace://evidence/problem-definition-403
+    evidence_id: evidence-403-a
+    evidence_type: requirement_trace
+    digest:
+      algorithm: sha256
+      value: "6789012345abcdef6789012345abcdef6789012345abcdef6789012345abcdef"
+
+  - ref: trace://evidence/architecture-decision-403
+    evidence_id: evidence-403-b
+    evidence_type: decision_trace
+    digest:
+      algorithm: sha256
+      value: "7890123456abcdef7890123456abcdef7890123456abcdef7890123456abcdef"
+
+  - ref: trace://evidence/planning-run-403
+    evidence_id: evidence-403-c
+    evidence_type: execution_trace
+
+  - ref: trace://unresolved-segments/segment-403-01
+    evidence_id: evidence-403-d
+    evidence_type: unresolved_causal_segment
+
+compatibility:
+  graph_versions:
+    - "0.3"
+
+  receipt_versions:
+    - "0.1"
+
+  interaction_versions:
+    - "0.2"
+
+bundle_assessment:
+  reference_coverage: 0.86
+  digest_coverage: 0.57
+  unresolved_reference_count: 1
