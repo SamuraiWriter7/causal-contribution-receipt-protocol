@@ -1,0 +1,30 @@
+protocol: causal-contribution-receipt
+protocol_version: "0.1"
+
+receipt_id: ccr-0441
+
+outcome:
+  outcome_id: outcome-999
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-999
+
+contributor:
+  contributor_id: agent-retriever-441
+  contributor_type: agent
+
+role:
+  role_type: retrieval
+  description: Retrieved evidence for the evaluated research answer.
+
+evidence:
+  output_refs:
+    - trace://evidence/retrieval-441
+
+assessment:
+  work: 0.18
+  causal_impact: 0.62
+  necessity: 0.55
+  quality_impact: 0.60
+  evidence_strength: 0.88
+
+contribution_class: medium
