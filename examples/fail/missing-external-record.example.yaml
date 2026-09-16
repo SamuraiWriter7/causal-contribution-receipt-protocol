@@ -1,0 +1,29 @@
+protocol: causal-contribution-bundle
+protocol_version: "0.4"
+
+bundle_id: bundle-fail-404
+
+graph_ref:
+  ref: trace://contribution-graphs/graph-444
+
+outcome_ref:
+  outcome_id: outcome-444
+  outcome_type: system_design
+  outcome_ref: trace://outcomes/outcome-444
+
+receipt_refs:
+  - ref: trace://contribution-receipts/ccr-does-not-exist
+    record_type: contribution_receipt
+    record_id: ccr-does-not-exist
+    protocol_version: "0.1"
+    contributor_id: agent-architect-444
+    outcome_id: outcome-444
+
+interaction_refs: []
+
+evidence_refs: []
+
+bundle_assessment:
+  reference_coverage: 0.5
+  digest_coverage: 0.0
+  unresolved_reference_count: 0
