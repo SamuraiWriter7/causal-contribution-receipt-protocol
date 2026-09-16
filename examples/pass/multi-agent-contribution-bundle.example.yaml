@@ -7,7 +7,7 @@ graph_ref:
   ref: trace://contribution-graphs/graph-402
   digest:
     algorithm: sha256
-    value: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    value: "5c04787f36a47e7ad87e270d554099f1fcfbb249637b7083914f77e70e321c66"
 
 outcome_ref:
   outcome_id: outcome-402
@@ -23,7 +23,7 @@ receipt_refs:
     outcome_id: outcome-402
     digest:
       algorithm: sha256
-      value: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      value: "024c7081562b12b07752e2d235ec719d0edb6c33923687009c5be9ec6071e284"
 
   - ref: trace://contribution-receipts/ccr-0412
     record_type: contribution_receipt
@@ -33,7 +33,7 @@ receipt_refs:
     outcome_id: outcome-402
     digest:
       algorithm: sha256
-      value: "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      value: "9b8ac4e68fd22082a7dd1eb9df86d4d7882f4a9ac68bc7acf987bfc64c267d21"
 
   - ref: trace://contribution-receipts/ccr-0413
     record_type: contribution_receipt
@@ -43,7 +43,7 @@ receipt_refs:
     outcome_id: outcome-402
     digest:
       algorithm: sha256
-      value: "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      value: "deed80bfefe2a14ad3e9933a47fd69760d85f710917082f3868046b90b37dcfc"
 
 interaction_refs:
   - ref: trace://contribution-interactions/interaction-0411
@@ -53,7 +53,7 @@ interaction_refs:
     outcome_id: outcome-402
     digest:
       algorithm: sha256
-      value: "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      value: "0ead9eae28030dd2305787db0c26e6e02541faa6c15c7fe23a364497c42274e7"
 
 evidence_refs:
   - ref: trace://evidence/retrieval-run-402
@@ -61,35 +61,35 @@ evidence_refs:
     evidence_type: execution_trace
     digest:
       algorithm: sha256
-      value: "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      value: "73eb32a8b765f1d249dc3ca8a5b9c37322eb531b22091e054b1a20a594494ba4"
 
   - ref: trace://evidence/verification-run-402
     evidence_id: evidence-402-b
     evidence_type: execution_trace
     digest:
       algorithm: sha256
-      value: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      value: "892b0843cf74a1f243072de233ead290ca36f90ccb8b4a59ff95c7cd2e332a60"
 
   - ref: trace://evidence/reasoning-run-402
     evidence_id: evidence-402-c
     evidence_type: execution_trace
     digest:
       algorithm: sha256
-      value: "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+      value: "6dcd78675667776e1559f7e059e9fca8b096291cffaa751f38a3a2f6a0175cae"
 
   - ref: trace://evidence/coalition-interaction-402
     evidence_id: evidence-402-d
     evidence_type: interaction_trace
     digest:
       algorithm: sha256
-      value: "2345678901abcdef2345678901abcdef2345678901abcdef2345678901abcdef"
+      value: "8a956e3ce5dc669eb6b083a0ced02960231ca67353812973f7beaa9188ae961f"
 
   - ref: trace://evidence/final-research-answer-402
     evidence_id: evidence-402-e
     evidence_type: outcome_evidence
     digest:
       algorithm: sha256
-      value: "3456789012abcdef3456789012abcdef3456789012abcdef3456789012abcdef"
+      value: "005ef4b1bf0e8b13e7c40593228c0080291d3e2624ea191e80721ed004d0d704"
 
 compatibility:
   graph_versions:
