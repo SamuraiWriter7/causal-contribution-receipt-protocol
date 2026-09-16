@@ -1,0 +1,263 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Causal Contribution Bundle",
+  "description": "A machine-readable bundle that groups a contribution graph with its referenced receipts, interactions, evidence, and related records for cross-record consistency and provenance validation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol",
+    "protocol_version",
+    "bundle_id",
+    "graph_ref",
+    "receipt_refs",
+    "interaction_refs",
+    "evidence_refs"
+  ],
+  "properties": {
+    "protocol": {
+      "type": "string",
+      "const": "causal-contribution-bundle",
+      "description": "Canonical protocol identifier."
+    },
+    "protocol_version": {
+      "type": "string",
+      "const": "0.4",
+      "description": "Protocol version."
+    },
+    "bundle_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "description": "Unique identifier for this contribution bundle."
+    },
+    "graph_ref": {
+      "$ref": "#/$defs/recordReference",
+      "description": "Reference to the contribution graph validated by this bundle."
+    },
+    "receipt_refs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4096,
+      "items": {
+        "$ref": "#/$defs/typedRecordReference"
+      },
+      "description": "Contribution receipts associated with the graph."
+    },
+    "interaction_refs": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 4096,
+      "items": {
+        "$ref": "#/$defs/typedRecordReference"
+      },
+      "description": "Contribution interaction records associated with the graph."
+    },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 16384,
+      "items": {
+        "$ref": "#/$defs/evidenceReference"
+      },
+      "description": "Evidence records used by the contribution graph, receipts, or interactions."
+    },
+    "outcome_ref": {
+      "$ref": "#/$defs/outcomeReference",
+      "description": "Optional canonical outcome declaration for cross-record consistency validation."
+    },
+    "compatibility": {
+      "$ref": "#/$defs/compatibility"
+    },
+    "bundle_assessment": {
+      "$ref": "#/$defs/bundleAssessment"
+    }
+  },
+  "$defs": {
+    "recordReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ref"
+      ],
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/reference"
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "typedRecordReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ref",
+        "record_type"
+      ],
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/reference"
+        },
+        "record_type": {
+          "type": "string",
+          "enum": [
+            "contribution_receipt",
+            "contribution_interaction"
+          ]
+        },
+        "record_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "protocol_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "contributor_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Optional contributor identifier declared for cross-record validation."
+        },
+        "outcome_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "description": "Optional outcome identifier declared for cross-record validation."
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "evidenceReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ref"
+      ],
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/reference"
+        },
+        "evidence_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "evidence_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "outcomeReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcome_id",
+        "outcome_ref"
+      ],
+      "properties": {
+        "outcome_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "outcome_ref": {
+          "$ref": "#/$defs/reference"
+        },
+        "outcome_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        }
+      }
+    },
+    "digest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "value"
+      ],
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "enum": [
+            "sha256"
+          ],
+          "description": "Digest algorithm used to identify the exact referenced content."
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[A-Fa-f0-9]{64}$",
+          "description": "Lowercase or uppercase hexadecimal SHA-256 digest."
+        }
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "graph_versions": {
+          "$ref": "#/$defs/versionArray"
+        },
+        "receipt_versions": {
+          "$ref": "#/$defs/versionArray"
+        },
+        "interaction_versions": {
+          "$ref": "#/$defs/versionArray"
+        }
+      }
+    },
+    "versionArray": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 32
+      }
+    },
+    "bundleAssessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reference_coverage": {
+          "$ref": "#/$defs/normalizedScore",
+          "description": "Normalized degree to which externally referenced records are included or resolvable."
+        },
+        "digest_coverage": {
+          "$ref": "#/$defs/normalizedScore",
+          "description": "Normalized degree to which bundled references are protected by content digests."
+        },
+        "unresolved_reference_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048
+    },
+    "normalizedScore": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    }
+  }
+}
