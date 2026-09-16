@@ -1,0 +1,36 @@
+protocol: causal-contribution-receipt
+protocol_version: "0.1"
+
+receipt_id: ccr-0402
+
+outcome:
+  outcome_id: outcome-401
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-401
+
+contributor:
+  contributor_id: agent-verifier-401
+  contributor_type: agent
+
+role:
+  role_type: source_verification
+  description: Verified retrieved evidence and rejected unreliable material.
+
+evidence:
+  input_refs:
+    - trace://evidence/retrieval-run-401
+
+  output_refs:
+    - trace://evidence/verification-run-401
+
+  downstream_refs:
+    - trace://contribution-interactions/interaction-0401
+
+assessment:
+  work: 0.14
+  causal_impact: 0.79
+  necessity: 0.73
+  quality_impact: 0.88
+  evidence_strength: 0.96
+
+contribution_class: critical
