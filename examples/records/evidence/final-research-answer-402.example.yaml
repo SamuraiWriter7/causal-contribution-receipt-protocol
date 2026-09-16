@@ -1,0 +1,12 @@
+evidence_id: evidence-402-e
+evidence_type: outcome_evidence
+outcome_id: outcome-402
+
+outcome_ref: trace://outcomes/outcome-402
+
+source_refs:
+  - trace://contribution-interactions/interaction-0411
+  - trace://evidence/coalition-interaction-402
+
+status: finalized
+
