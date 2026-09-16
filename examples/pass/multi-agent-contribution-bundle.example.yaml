@@ -89,7 +89,7 @@ evidence_refs:
     evidence_type: outcome_evidence
     digest:
       algorithm: sha256
-      value: "005ef4b1bf0e8b13e7c40593228c0080291d3e2624ea191e80721ed004d0d704"
+      value: "3d58c15191ea975934a229721127402feac1ea0fd9a056ce447d8f9b14fd5c44"
 
 compatibility:
   graph_versions:
@@ -105,3 +105,4 @@ bundle_assessment:
   reference_coverage: 1.0
   digest_coverage: 1.0
   unresolved_reference_count: 0
+
