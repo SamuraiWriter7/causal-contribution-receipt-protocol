@@ -1,0 +1,41 @@
+protocol: causal-contribution-bundle
+protocol_version: "0.4"
+
+bundle_id: bundle-fail-403
+
+graph_ref:
+  ref: trace://contribution-graphs/graph-443
+
+outcome_ref:
+  outcome_id: outcome-443
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-443
+
+receipt_refs:
+  - ref: trace://contribution-receipts/ccr-0443
+    record_type: contribution_receipt
+    record_id: ccr-0443
+    protocol_version: "0.1"
+    contributor_id: agent-retriever-443
+    outcome_id: outcome-443
+
+  - ref: trace://contribution-receipts/ccr-0444
+    record_type: contribution_receipt
+    record_id: ccr-0444
+    protocol_version: "0.1"
+    contributor_id: agent-verifier-443
+    outcome_id: outcome-443
+
+interaction_refs:
+  - ref: trace://contribution-interactions/interaction-0443
+    record_type: contribution_interaction
+    record_id: interaction-0443
+    protocol_version: "0.2"
+    outcome_id: outcome-443
+
+evidence_refs: []
+
+bundle_assessment:
+  reference_coverage: 1.0
+  digest_coverage: 0.0
+  unresolved_reference_count: 0
