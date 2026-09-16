@@ -1,0 +1,29 @@
+protocol: causal-contribution-graph
+protocol_version: "0.3"
+
+graph_id: graph-444
+
+outcome:
+  outcome_id: outcome-444
+  outcome_type: system_design
+  outcome_ref: trace://outcomes/outcome-444
+
+nodes:
+  - node_id: receipt-missing-444
+    node_type: contribution_receipt
+    ref: trace://contribution-receipts/ccr-does-not-exist
+    contributor_id: agent-architect-444
+    evidence_status: unresolved
+
+  - node_id: outcome-444
+    node_type: outcome
+    ref: trace://outcomes/outcome-444
+    evidence_status: verified
+
+edges:
+  - edge_id: edge-444-a
+    from: receipt-missing-444
+    to: outcome-444
+    relation: contributed_to
+    verification_status: unresolved
+    uncertainty: 0.80
