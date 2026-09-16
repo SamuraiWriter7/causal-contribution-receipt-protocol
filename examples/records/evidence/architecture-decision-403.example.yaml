@@ -1,0 +1,20 @@
+evidence_id: evidence-403-b
+evidence_type: decision_trace
+outcome_id: outcome-403
+
+producer:
+  contributor_id: agent-architect-403
+  contributor_type: agent
+
+decision:
+  decision_id: architecture-decision-403
+  decision_type: architecture_selection
+  status: recorded
+
+input_refs:
+  - trace://evidence/problem-definition-403
+  - trace://evidence/planning-run-403
+
+used_by:
+  - trace://contribution-receipts/ccr-0422
+  - trace://outcomes/outcome-403
