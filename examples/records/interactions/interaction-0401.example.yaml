@@ -1,0 +1,39 @@
+protocol: causal-contribution-interaction
+protocol_version: "0.2"
+
+interaction_id: interaction-0401
+
+outcome:
+  outcome_id: outcome-401
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-401
+
+contributors:
+  - contributor_id: agent-retriever-401
+    contributor_type: agent
+    receipt_ref: trace://contribution-receipts/ccr-0401
+
+  - contributor_id: agent-verifier-401
+    contributor_type: agent
+    receipt_ref: trace://contribution-receipts/ccr-0402
+
+interaction_type: synergistic
+
+individual_receipt_refs:
+  - trace://contribution-receipts/ccr-0401
+  - trace://contribution-receipts/ccr-0402
+
+evidence:
+  trace_refs:
+    - trace://evidence/retrieval-run-401
+    - trace://evidence/verification-run-401
+    - trace://evidence/retrieval-verification-interaction-401
+
+  downstream_refs:
+    - trace://evidence/final-answer-401
+
+assessment:
+  joint_effect: 0.86
+  synergy: 0.54
+  dependency: 0.77
+  evidence_strength: 0.96
