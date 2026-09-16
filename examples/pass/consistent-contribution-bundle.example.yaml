@@ -51,7 +51,7 @@ evidence_refs:
     evidence_type: execution_trace
     digest:
       algorithm: sha256
-      value: "9ae6f381f1a9b46f8e08f2e91804578de904655d076e4a77d4880d3dc1e618bc"
+      value: "2d6a72999b0cc54865554c07320033e0730e280d5d2e9bd924558cd48c01856f"
 
   - ref: trace://evidence/verification-run-401
     evidence_id: evidence-401-b
