@@ -1,0 +1,33 @@
+protocol: causal-contribution-receipt
+protocol_version: "0.1"
+
+receipt_id: ccr-0411
+
+outcome:
+  outcome_id: outcome-402
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-402
+
+contributor:
+  contributor_id: agent-retriever-402
+  contributor_type: agent
+
+role:
+  role_type: retrieval
+  description: Retrieved candidate primary and secondary evidence.
+
+evidence:
+  output_refs:
+    - trace://evidence/retrieval-run-402
+
+  downstream_refs:
+    - trace://contribution-interactions/interaction-0411
+
+assessment:
+  work: 0.16
+  causal_impact: 0.64
+  necessity: 0.59
+  quality_impact: 0.61
+  evidence_strength: 0.95
+
+contribution_class: high
