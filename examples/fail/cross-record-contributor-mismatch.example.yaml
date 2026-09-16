@@ -1,0 +1,29 @@
+protocol: causal-contribution-bundle
+protocol_version: "0.4"
+
+bundle_id: bundle-fail-402
+
+graph_ref:
+  ref: trace://contribution-graphs/graph-442
+
+outcome_ref:
+  outcome_id: outcome-442
+  outcome_type: generated_answer
+  outcome_ref: trace://outcomes/outcome-442
+
+receipt_refs:
+  - ref: trace://contribution-receipts/ccr-0442
+    record_type: contribution_receipt
+    record_id: ccr-0442
+    protocol_version: "0.1"
+    contributor_id: agent-declared-442
+    outcome_id: outcome-442
+
+interaction_refs: []
+
+evidence_refs: []
+
+bundle_assessment:
+  reference_coverage: 1.0
+  digest_coverage: 0.0
+  unresolved_reference_count: 0
