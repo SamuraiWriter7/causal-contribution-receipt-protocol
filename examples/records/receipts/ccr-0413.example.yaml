@@ -1,0 +1,36 @@
+protocol: causal-contribution-receipt
+protocol_version: "0.1"
+
+receipt_id: ccr-0413
+
+outcome:
+  outcome_id: outcome-402
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-402
+
+contributor:
+  contributor_id: agent-reasoner-402
+  contributor_type: agent
+
+role:
+  role_type: reasoning
+  description: Integrated verified evidence into the reasoning path used for the final answer.
+
+evidence:
+  input_refs:
+    - trace://evidence/verification-run-402
+
+  output_refs:
+    - trace://evidence/reasoning-run-402
+
+  downstream_refs:
+    - trace://contribution-interactions/interaction-0411
+
+assessment:
+  work: 0.24
+  causal_impact: 0.81
+  necessity: 0.75
+  quality_impact: 0.83
+  evidence_strength: 0.95
+
+contribution_class: critical
