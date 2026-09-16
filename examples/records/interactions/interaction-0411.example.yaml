@@ -1,0 +1,60 @@
+protocol: causal-contribution-interaction
+protocol_version: "0.2"
+
+interaction_id: interaction-0411
+
+outcome:
+  outcome_id: outcome-402
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-402
+
+contributors:
+  - contributor_id: agent-retriever-402
+    contributor_type: agent
+    receipt_ref: trace://contribution-receipts/ccr-0411
+
+  - contributor_id: agent-verifier-402
+    contributor_type: agent
+    receipt_ref: trace://contribution-receipts/ccr-0412
+
+  - contributor_id: agent-reasoner-402
+    contributor_type: agent
+    receipt_ref: trace://contribution-receipts/ccr-0413
+
+interaction_type: synergistic
+
+individual_receipt_refs:
+  - trace://contribution-receipts/ccr-0411
+  - trace://contribution-receipts/ccr-0412
+  - trace://contribution-receipts/ccr-0413
+
+evidence:
+  trace_refs:
+    - trace://evidence/retrieval-run-402
+    - trace://evidence/verification-run-402
+    - trace://evidence/reasoning-run-402
+    - trace://evidence/coalition-interaction-402
+
+  downstream_refs:
+    - trace://evidence/final-research-answer-402
+
+assessment:
+  joint_effect: 0.93
+  synergy: 0.69
+  dependency: 0.85
+  evidence_strength: 0.97
+
+counterfactual:
+  method: leave_group_out
+
+  baseline:
+    quality_score: 0.95
+
+  comparison:
+    quality_score: 0.41
+
+  observed_delta: 0.54
+
+  comparison_description: >
+    Removed the retrieval, verification, and reasoning coalition
+    while preserving downstream output handling.
