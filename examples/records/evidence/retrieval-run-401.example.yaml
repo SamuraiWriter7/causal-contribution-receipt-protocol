@@ -1,4 +1,21 @@
-evidence_id: evidence-401-a evidence_type: execution_trace outcome_id: outcome-401 producer: contributor_id: agent-retriever-401 contributor_type: agent action: action_type: retrieval status: completed result_refs: - trace://retrieval-results/candidates-401 used_by: - trace://contribution-receipts/ccr-0401 - trace://contribution-interactions/interaction-0401
+evidence_id: evidence-401-a
+evidence_type: execution_trace
+outcome_id: outcome-401
+
+producer:
+  contributor_id: agent-retriever-401
+  contributor_type: agent
+
+action:
+  action_type: retrieval
+  status: completed
+
+result_refs:
+  - trace://retrieval-results/candidates-401
+
+used_by:
+  - trace://contribution-receipts/ccr-0401
+  - trace://contribution-interactions/interaction-0401
 
 
 
