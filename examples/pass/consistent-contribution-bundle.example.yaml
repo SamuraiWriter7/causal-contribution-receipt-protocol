@@ -7,7 +7,7 @@ graph_ref:
   ref: trace://contribution-graphs/graph-401
   digest:
     algorithm: sha256
-    value: "1111111111111111111111111111111111111111111111111111111111111111"
+    value: "5b124a31bae96ab140c19036497dd493b99c23d3faaa4ea8c8b87d5d97377b90"
 
 outcome_ref:
   outcome_id: outcome-401
@@ -23,7 +23,7 @@ receipt_refs:
     outcome_id: outcome-401
     digest:
       algorithm: sha256
-      value: "2222222222222222222222222222222222222222222222222222222222222222"
+      value: "07809ade883ad54a98262bf4b2cbd812363f36998daa090908278954c85db9e0"
 
   - ref: trace://contribution-receipts/ccr-0402
     record_type: contribution_receipt
@@ -33,7 +33,7 @@ receipt_refs:
     outcome_id: outcome-401
     digest:
       algorithm: sha256
-      value: "3333333333333333333333333333333333333333333333333333333333333333"
+      value: "c26ffd4ff93f25bd9e91e414a8f2fad48c9c78fe2ae45cc34fbd63e9595df974"
 
 interaction_refs:
   - ref: trace://contribution-interactions/interaction-0401
@@ -43,7 +43,7 @@ interaction_refs:
     outcome_id: outcome-401
     digest:
       algorithm: sha256
-      value: "4444444444444444444444444444444444444444444444444444444444444444"
+      value: "ac876a621afad5d4d6247f18efb7026d7c5993871ad85f52c76414900dff603c"
 
 evidence_refs:
   - ref: trace://evidence/retrieval-run-401
@@ -51,28 +51,28 @@ evidence_refs:
     evidence_type: execution_trace
     digest:
       algorithm: sha256
-      value: "5555555555555555555555555555555555555555555555555555555555555555"
+      value: "9ae6f381f1a9b46f8e08f2e91804578de904655d076e4a77d4880d3dc1e618bc"
 
   - ref: trace://evidence/verification-run-401
     evidence_id: evidence-401-b
     evidence_type: execution_trace
     digest:
       algorithm: sha256
-      value: "6666666666666666666666666666666666666666666666666666666666666666"
+      value: "e587dda51c6086fd562331b6c1618b8395720912485754c9937b4077c9ac872c"
 
   - ref: trace://evidence/retrieval-verification-interaction-401
     evidence_id: evidence-401-c
     evidence_type: interaction_trace
     digest:
       algorithm: sha256
-      value: "7777777777777777777777777777777777777777777777777777777777777777"
+      value: "2b00d1eddb43b2650af91f4b5c401ca6e5a40e70cba8697071fc6f1291c0c4cc"
 
   - ref: trace://evidence/final-answer-401
     evidence_id: evidence-401-d
     evidence_type: outcome_evidence
     digest:
       algorithm: sha256
-      value: "8888888888888888888888888888888888888888888888888888888888888888"
+      value: "70fdb546fe3105321964e64a69949379c474cb0328998cb690827f1b6e12ab42"
 
 compatibility:
   graph_versions:
