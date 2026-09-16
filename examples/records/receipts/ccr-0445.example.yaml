@@ -1,0 +1,30 @@
+protocol: causal-contribution-receipt
+protocol_version: "0.1"
+
+receipt_id: ccr-0445
+
+outcome:
+  outcome_id: outcome-445
+  outcome_type: generated_answer
+  outcome_ref: trace://outcomes/outcome-445
+
+contributor:
+  contributor_id: agent-auditor-445
+  contributor_type: agent
+
+role:
+  role_type: audit
+  description: Audited the generated answer before finalization.
+
+evidence:
+  output_refs:
+    - trace://evidence/audit-445
+
+assessment:
+  work: 0.10
+  causal_impact: 0.77
+  necessity: 0.69
+  quality_impact: 0.88
+  evidence_strength: 0.94
+
+contribution_class: high
