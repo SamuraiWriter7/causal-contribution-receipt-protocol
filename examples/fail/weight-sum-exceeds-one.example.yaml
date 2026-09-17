@@ -1,0 +1,72 @@
+protocol: causal-contribution-weight-assessment
+protocol_version: "0.5"
+
+assessment_id: weight-assessment-fail-501
+
+outcome_ref:
+  outcome_id: outcome-401
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-401
+
+bundle_ref:
+  ref: trace://contribution-bundles/bundle-001
+  bundle_id: bundle-001
+  protocol_version: "0.4"
+
+method:
+  type: evidence_weighted
+  description: >
+    Intentionally invalid assessment in which individually valid
+    contribution weights exceed the total available contribution space.
+
+weights:
+  - weight_id: weight-fail-501-a
+    subject_ref: trace://contribution-receipts/ccr-0401
+    subject_type: contribution_receipt
+    contributor_id: agent-retriever-401
+
+    estimated_weight: 0.60
+    lower_bound: 0.50
+    upper_bound: 0.70
+    confidence: 0.91
+
+    evidence_refs:
+      - trace://contribution-receipts/ccr-0401
+      - trace://evidence/retrieval-run-401
+
+    basis:
+      causal_impact: 0.67
+      necessity: 0.61
+      quality_impact: 0.64
+      evidence_strength: 0.94
+
+  - weight_id: weight-fail-501-b
+    subject_ref: trace://contribution-receipts/ccr-0402
+    subject_type: contribution_receipt
+    contributor_id: agent-verifier-401
+
+    estimated_weight: 0.55
+    lower_bound: 0.45
+    upper_bound: 0.65
+    confidence: 0.95
+
+    evidence_refs:
+      - trace://contribution-receipts/ccr-0402
+      - trace://evidence/verification-run-401
+
+    basis:
+      causal_impact: 0.79
+      necessity: 0.73
+      quality_impact: 0.88
+      evidence_strength: 0.96
+
+unresolved_weight: 0.00
+
+assessment_summary:
+  known_weight: 1.00
+  subject_count: 2
+  interaction_subject_count: 0
+  confidence: 0.93
+  uncertainty_note: >
+    This example intentionally over-allocates known contribution weight
+    and must be rejected by semantic validation.
