@@ -1,0 +1,138 @@
+protocol: causal-contribution-weight-assessment
+protocol_version: "0.5"
+
+assessment_id: weight-assessment-502
+
+outcome_ref:
+  outcome_id: outcome-402
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-402
+
+bundle_ref:
+  ref: trace://contribution-bundles/bundle-002
+  bundle_id: bundle-002
+  protocol_version: "0.4"
+
+method:
+  type: coalition_adjusted
+  method_refs:
+    - trace://contribution-interactions/interaction-0411
+  description: >
+    Estimate individual contribution weights while preserving
+    coalition-level synergy as a distinct interaction contribution
+    rather than redistributing it automatically to individuals.
+
+weights:
+  - weight_id: weight-502-a
+    subject_ref: trace://contribution-receipts/ccr-0411
+    subject_type: contribution_receipt
+    contributor_id: agent-retriever-402
+
+    estimated_weight: 0.22
+    lower_bound: 0.17
+    upper_bound: 0.27
+    confidence: 0.90
+
+    evidence_refs:
+      - trace://contribution-receipts/ccr-0411
+      - trace://evidence/retrieval-run-402
+
+    basis:
+      causal_impact: 0.64
+      necessity: 0.59
+      quality_impact: 0.61
+      evidence_strength: 0.95
+      substitutability: 0.41
+
+    interaction_adjustment:
+      applied: false
+
+  - weight_id: weight-502-b
+    subject_ref: trace://contribution-receipts/ccr-0412
+    subject_type: contribution_receipt
+    contributor_id: agent-verifier-402
+
+    estimated_weight: 0.24
+    lower_bound: 0.19
+    upper_bound: 0.30
+    confidence: 0.93
+
+    evidence_refs:
+      - trace://contribution-receipts/ccr-0412
+      - trace://evidence/verification-run-402
+
+    basis:
+      causal_impact: 0.76
+      necessity: 0.70
+      quality_impact: 0.86
+      evidence_strength: 0.97
+      substitutability: 0.30
+
+    interaction_adjustment:
+      applied: false
+
+  - weight_id: weight-502-c
+    subject_ref: trace://contribution-receipts/ccr-0413
+    subject_type: contribution_receipt
+    contributor_id: agent-reasoner-402
+
+    estimated_weight: 0.26
+    lower_bound: 0.21
+    upper_bound: 0.32
+    confidence: 0.92
+
+    evidence_refs:
+      - trace://contribution-receipts/ccr-0413
+      - trace://evidence/reasoning-run-402
+
+    basis:
+      causal_impact: 0.81
+      necessity: 0.75
+      quality_impact: 0.83
+      evidence_strength: 0.95
+      substitutability: 0.25
+
+    interaction_adjustment:
+      applied: false
+
+  - weight_id: weight-502-d
+    subject_ref: trace://contribution-interactions/interaction-0411
+    subject_type: contribution_interaction
+
+    estimated_weight: 0.18
+    lower_bound: 0.12
+    upper_bound: 0.24
+    confidence: 0.89
+
+    evidence_refs:
+      - trace://contribution-interactions/interaction-0411
+      - trace://evidence/coalition-interaction-402
+      - trace://evidence/final-research-answer-402
+
+    basis:
+      causal_impact: 0.93
+      necessity: 0.85
+      quality_impact: 0.90
+      evidence_strength: 0.97
+      counterfactual_delta: 0.54
+
+    interaction_adjustment:
+      applied: true
+      interaction_refs:
+        - trace://contribution-interactions/interaction-0411
+      adjustment: 0.18
+      description: >
+        Coalition synergy is represented as its own contribution
+        weight and is not divided among the three individual agents.
+
+unresolved_weight: 0.10
+
+assessment_summary:
+  known_weight: 0.90
+  subject_count: 4
+  interaction_subject_count: 1
+  confidence: 0.91
+  uncertainty_note: >
+    Ten percent remains unresolved. The coalition contribution is
+    preserved as a separate interaction weight and is not automatically
+    attributed to any individual contributor.
