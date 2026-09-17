@@ -1,0 +1,78 @@
+protocol: causal-contribution-weight-assessment
+protocol_version: "0.5"
+
+assessment_id: weight-assessment-fail-502
+
+outcome_ref:
+  outcome_id: outcome-403
+  outcome_type: system_design
+  outcome_ref: trace://outcomes/outcome-403
+
+bundle_ref:
+  ref: trace://contribution-bundles/bundle-003
+  bundle_id: bundle-003
+  protocol_version: "0.4"
+
+method:
+  type: hybrid
+  method_refs:
+    - trace://contribution-graphs/graph-403
+    - trace://contribution-receipts/ccr-0421
+    - trace://contribution-receipts/ccr-0422
+  description: >
+    Intentionally invalid assessment that assigns all contribution
+    weight to known contributors even though the referenced bundle
+    contains an unresolved causal segment.
+
+weights:
+  - weight_id: weight-fail-502-a
+    subject_ref: trace://contribution-receipts/ccr-0421
+    subject_type: contribution_receipt
+    contributor_id: human-problem-setter-403
+
+    estimated_weight: 0.48
+    lower_bound: 0.40
+    upper_bound: 0.55
+    confidence: 0.91
+
+    evidence_refs:
+      - trace://contribution-receipts/ccr-0421
+      - trace://evidence/problem-definition-403
+
+    basis:
+      causal_impact: 0.84
+      necessity: 0.89
+      quality_impact: 0.82
+      evidence_strength: 0.94
+
+  - weight_id: weight-fail-502-b
+    subject_ref: trace://contribution-receipts/ccr-0422
+    subject_type: contribution_receipt
+    contributor_id: agent-architect-403
+
+    estimated_weight: 0.52
+    lower_bound: 0.38
+    upper_bound: 0.62
+    confidence: 0.68
+
+    evidence_refs:
+      - trace://contribution-receipts/ccr-0422
+      - trace://evidence/architecture-decision-403
+      - trace://evidence/planning-run-403
+
+    basis:
+      causal_impact: 0.78
+      necessity: 0.69
+      quality_impact: 0.80
+      evidence_strength: 0.66
+
+unresolved_weight: 0.00
+
+assessment_summary:
+  known_weight: 1.00
+  subject_count: 2
+  interaction_subject_count: 0
+  confidence: 0.79
+  uncertainty_note: >
+    This example intentionally forces unresolved contribution to zero
+    despite unresolved causal evidence in the referenced bundle.
