@@ -1,0 +1,343 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/contribution-weight-assessment.schema.json",
+  "title": "Causal Contribution Weight Assessment",
+  "description": "A machine-readable assessment of relative causal contribution weights for a specific outcome. Contribution weights describe evidentially supported contribution estimates and MUST NOT directly imply attribution ownership, entitlement, royalty allocation, payment, or settlement.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol",
+    "protocol_version",
+    "assessment_id",
+    "outcome_ref",
+    "bundle_ref",
+    "method",
+    "weights",
+    "unresolved_weight",
+    "assessment_summary"
+  ],
+  "properties": {
+    "protocol": {
+      "const": "causal-contribution-weight-assessment"
+    },
+    "protocol_version": {
+      "const": "0.5"
+    },
+    "assessment_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "outcome_ref": {
+      "$ref": "#/$defs/outcomeReference"
+    },
+    "bundle_ref": {
+      "$ref": "#/$defs/bundleReference"
+    },
+    "method": {
+      "$ref": "#/$defs/assessmentMethod"
+    },
+    "weights": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4096,
+      "items": {
+        "$ref": "#/$defs/weightEntry"
+      }
+    },
+    "unresolved_weight": {
+      "$ref": "#/$defs/normalizedScore"
+    },
+    "assessment_summary": {
+      "$ref": "#/$defs/assessmentSummary"
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048
+    },
+    "normalizedScore": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "signedScore": {
+      "type": "number",
+      "minimum": -1.0,
+      "maximum": 1.0
+    },
+    "digest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "value"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "sha256"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[A-Fa-f0-9]{64}$"
+        }
+      }
+    },
+    "outcomeReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcome_id",
+        "outcome_ref"
+      ],
+      "properties": {
+        "outcome_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "outcome_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+        },
+        "outcome_ref": {
+          "$ref": "#/$defs/reference"
+        }
+      }
+    },
+    "bundleReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ref"
+      ],
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/reference"
+        },
+        "bundle_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "protocol_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "assessmentMethod": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "evidence_weighted",
+            "counterfactual_marginal",
+            "coalition_adjusted",
+            "shapley_approximation",
+            "hybrid"
+          ]
+        },
+        "method_refs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/reference"
+          }
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        }
+      }
+    },
+    "weightEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "weight_id",
+        "subject_ref",
+        "subject_type",
+        "estimated_weight",
+        "lower_bound",
+        "upper_bound",
+        "confidence",
+        "evidence_refs"
+      ],
+      "properties": {
+        "weight_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "subject_ref": {
+          "$ref": "#/$defs/reference"
+        },
+        "subject_type": {
+          "type": "string",
+          "enum": [
+            "contributor",
+            "contribution_receipt",
+            "contribution_interaction"
+          ]
+        },
+        "contributor_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "estimated_weight": {
+          "$ref": "#/$defs/normalizedScore"
+        },
+        "lower_bound": {
+          "$ref": "#/$defs/normalizedScore"
+        },
+        "upper_bound": {
+          "$ref": "#/$defs/normalizedScore"
+        },
+        "confidence": {
+          "$ref": "#/$defs/normalizedScore"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/reference"
+          }
+        },
+        "basis": {
+          "$ref": "#/$defs/weightBasis"
+        },
+        "interaction_adjustment": {
+          "$ref": "#/$defs/interactionAdjustment"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      }
+    },
+    "weightBasis": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "causal_impact": {
+          "$ref": "#/$defs/normalizedScore"
+        },
+        "necessity": {
+          "$ref": "#/$defs/normalizedScore"
+        },
+        "quality_impact": {
+          "$ref": "#/$defs/normalizedScore"
+        },
+        "evidence_strength": {
+          "$ref": "#/$defs/normalizedScore"
+        },
+        "counterfactual_delta": {
+          "$ref": "#/$defs/signedScore"
+        },
+        "substitutability": {
+          "$ref": "#/$defs/normalizedScore"
+        }
+      },
+      "minProperties": 1
+    },
+    "interactionAdjustment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "applied"
+      ],
+      "properties": {
+        "applied": {
+          "type": "boolean"
+        },
+        "interaction_refs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/reference"
+          }
+        },
+        "adjustment": {
+          "$ref": "#/$defs/signedScore"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "applied": {
+                "const": true
+              }
+            },
+            "required": [
+              "applied"
+            ]
+          },
+          "then": {
+            "required": [
+              "interaction_refs",
+              "adjustment"
+            ]
+          }
+        }
+      ]
+    },
+    "assessmentSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "known_weight",
+        "subject_count",
+        "interaction_subject_count",
+        "confidence"
+      ],
+      "properties": {
+        "known_weight": {
+          "$ref": "#/$defs/normalizedScore"
+        },
+        "subject_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "interaction_subject_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        },
+        "confidence": {
+          "$ref": "#/$defs/normalizedScore"
+        },
+        "uncertainty_note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      }
+    }
+  }
+}
