@@ -1,0 +1,129 @@
+protocol: causal-contribution-weight-assessment
+protocol_version: "0.5"
+
+assessment_id: weight-assessment-504
+
+outcome_ref:
+  outcome_id: outcome-402
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-402
+
+bundle_ref:
+  ref: trace://contribution-bundles/bundle-002
+  bundle_id: bundle-002
+  protocol_version: "0.4"
+
+method:
+  type: shapley_approximation
+  method_refs:
+    - trace://contribution-interactions/interaction-0411
+    - trace://counterfactuals/coalition-samples-402
+  description: >
+    Approximate relative contribution weights from sampled coalition
+    counterfactuals. Shapley-derived values are used as estimation
+    evidence and are not treated as absolute causal truth or as
+    economic entitlement.
+
+weights:
+  - weight_id: weight-504-a
+    subject_ref: trace://contribution-receipts/ccr-0411
+    subject_type: contribution_receipt
+    contributor_id: agent-retriever-402
+
+    estimated_weight: 0.21
+    lower_bound: 0.16
+    upper_bound: 0.27
+    confidence: 0.86
+
+    evidence_refs:
+      - trace://contribution-receipts/ccr-0411
+      - trace://evidence/retrieval-run-402
+      - trace://counterfactuals/coalition-samples-402
+
+    basis:
+      causal_impact: 0.64
+      necessity: 0.59
+      quality_impact: 0.61
+      evidence_strength: 0.95
+      counterfactual_delta: 0.19
+      substitutability: 0.41
+
+  - weight_id: weight-504-b
+    subject_ref: trace://contribution-receipts/ccr-0412
+    subject_type: contribution_receipt
+    contributor_id: agent-verifier-402
+
+    estimated_weight: 0.27
+    lower_bound: 0.21
+    upper_bound: 0.33
+    confidence: 0.89
+
+    evidence_refs:
+      - trace://contribution-receipts/ccr-0412
+      - trace://evidence/verification-run-402
+      - trace://counterfactuals/coalition-samples-402
+
+    basis:
+      causal_impact: 0.76
+      necessity: 0.70
+      quality_impact: 0.86
+      evidence_strength: 0.97
+      counterfactual_delta: 0.25
+      substitutability: 0.30
+
+  - weight_id: weight-504-c
+    subject_ref: trace://contribution-receipts/ccr-0413
+    subject_type: contribution_receipt
+    contributor_id: agent-reasoner-402
+
+    estimated_weight: 0.30
+    lower_bound: 0.24
+    upper_bound: 0.36
+    confidence: 0.88
+
+    evidence_refs:
+      - trace://contribution-receipts/ccr-0413
+      - trace://evidence/reasoning-run-402
+      - trace://counterfactuals/coalition-samples-402
+
+    basis:
+      causal_impact: 0.81
+      necessity: 0.75
+      quality_impact: 0.83
+      evidence_strength: 0.95
+      counterfactual_delta: 0.28
+      substitutability: 0.25
+
+  - weight_id: weight-504-d
+    subject_ref: trace://contribution-interactions/interaction-0411
+    subject_type: contribution_interaction
+
+    estimated_weight: 0.12
+    lower_bound: 0.07
+    upper_bound: 0.17
+    confidence: 0.82
+
+    evidence_refs:
+      - trace://contribution-interactions/interaction-0411
+      - trace://evidence/coalition-interaction-402
+      - trace://counterfactuals/coalition-samples-402
+
+    basis:
+      causal_impact: 0.93
+      necessity: 0.85
+      quality_impact: 0.90
+      evidence_strength: 0.97
+      counterfactual_delta: 0.54
+
+unresolved_weight: 0.10
+
+assessment_summary:
+  known_weight: 0.90
+  subject_count: 4
+  interaction_subject_count: 1
+  confidence: 0.86
+  uncertainty_note: >
+    Shapley-style coalition sampling provides a relative contribution
+    estimate under the tested coalition model. Ten percent remains
+    unresolved because the sampled coalition space and causal evidence
+    do not justify complete allocation.
