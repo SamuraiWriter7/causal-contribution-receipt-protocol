@@ -3,7 +3,6 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
@@ -24,7 +23,6 @@ RECORD_INDEX_PATH = (
     / "records"
     / "index.yaml"
 )
-
 
 SCHEMA_PATHS = {
     "causal-contribution-receipt": (
@@ -47,25 +45,35 @@ SCHEMA_PATHS = {
         / "schemas"
         / "contribution-bundle.schema.json"
     ),
+    "causal-contribution-weight-assessment": (
+        REPO_ROOT
+        / "schemas"
+        / "contribution-weight-assessment.schema.json"
+    ),
 }
-
 
 EPSILON = 1e-9
 COVERAGE_TOLERANCE = 0.0051
 
 
-# ---------------------------------------------------------------------------
-# Basic loading
-# ---------------------------------------------------------------------------
+# ============================================================
+# BASIC LOADING
+# ============================================================
 
 
 def load_json(path: Path) -> dict[str, Any]:
-    with path.open("r", encoding="utf-8") as file:
+    with path.open(
+        "r",
+        encoding="utf-8",
+    ) as file:
         return json.load(file)
 
 
 def load_yaml(path: Path) -> Any:
-    with path.open("r", encoding="utf-8") as file:
+    with path.open(
+        "r",
+        encoding="utf-8",
+    ) as file:
         return yaml.safe_load(file)
 
 
@@ -117,52 +125,100 @@ def approximately_equal_coverage(
     actual: float,
     declared: float,
 ) -> bool:
-    return abs(round(actual, 2) - declared) <= COVERAGE_TOLERANCE
+    return (
+        abs(
+            round(actual, 2)
+            - declared
+        )
+        <= COVERAGE_TOLERANCE
+    )
 
 
-# ---------------------------------------------------------------------------
-# Schema loading
-# ---------------------------------------------------------------------------
+def duplicate_values(
+    values: list[str],
+) -> list[str]:
+    seen: set[str] = set()
+    duplicates: set[str] = set()
+
+    for value in values:
+        if value in seen:
+            duplicates.add(value)
+        else:
+            seen.add(value)
+
+    return sorted(duplicates)
 
 
-def load_validators() -> dict[str, Draft202012Validator]:
-    validators: dict[str, Draft202012Validator] = {}
+# ============================================================
+# SCHEMA
+# ============================================================
+
+
+def load_validators(
+) -> dict[str, Draft202012Validator]:
+    validators: dict[
+        str,
+        Draft202012Validator,
+    ] = {}
 
     print("=== SCHEMA VALIDATION ===")
 
     for protocol, schema_path in SCHEMA_PATHS.items():
-        relative_path = schema_path.relative_to(REPO_ROOT)
+        relative_path = schema_path.relative_to(
+            REPO_ROOT
+        )
 
         print()
-        print(f"[load-schema] {relative_path}")
+        print(
+            f"[load-schema] {relative_path}"
+        )
 
         if not schema_path.exists():
-            print(f"[fatal] schema not found: {relative_path}")
+            print(
+                f"[fatal] schema not found: "
+                f"{relative_path}"
+            )
             raise SystemExit(1)
 
         try:
             schema = load_json(schema_path)
         except Exception as exc:
-            print(f"[schema-load-error] {exc}")
+            print(
+                f"[schema-load-error] {exc}"
+            )
             raise SystemExit(1)
 
         try:
-            Draft202012Validator.check_schema(schema)
+            Draft202012Validator.check_schema(
+                schema
+            )
         except SchemaError as exc:
-            print(f"[schema-invalid] {exc.message}")
+            print(
+                f"[schema-invalid] {exc.message}"
+            )
             raise SystemExit(1)
 
-        validators[protocol] = Draft202012Validator(schema)
+        validators[protocol] = (
+            Draft202012Validator(schema)
+        )
 
-        print(f"[schema-ok] protocol={protocol}")
+        print(
+            f"[schema-ok] protocol={protocol}"
+        )
 
     return validators
 
 
 def resolve_validator(
     data: Any,
-    validators: dict[str, Draft202012Validator],
-) -> tuple[str | None, Draft202012Validator | None]:
+    validators: dict[
+        str,
+        Draft202012Validator,
+    ],
+) -> tuple[
+    str | None,
+    Draft202012Validator | None,
+]:
     if not isinstance(data, dict):
         return None, None
 
@@ -171,7 +227,10 @@ def resolve_validator(
     if not isinstance(protocol, str):
         return None, None
 
-    return protocol, validators.get(protocol)
+    return (
+        protocol,
+        validators.get(protocol),
+    )
 
 
 def collect_schema_errors(
@@ -187,7 +246,9 @@ def collect_schema_errors(
     )
 
 
-def print_schema_errors(errors: list[Any]) -> None:
+def print_schema_errors(
+    errors: list[Any],
+) -> None:
     for error in errors:
         print(
             "[schema-error] "
@@ -196,9 +257,9 @@ def print_schema_errors(errors: list[Any]) -> None:
         )
 
 
-# ---------------------------------------------------------------------------
-# Record resolver
-# ---------------------------------------------------------------------------
+# ============================================================
+# RECORD RESOLVER
+# ============================================================
 
 
 @dataclass(frozen=True)
@@ -216,7 +277,10 @@ class RecordResolver:
         index: dict[str, Path],
     ) -> None:
         self.index = index
-        self.cache: dict[str, ResolvedRecord] = {}
+        self.cache: dict[
+            str,
+            ResolvedRecord,
+        ] = {}
 
     def resolve(
         self,
@@ -239,7 +303,9 @@ class RecordResolver:
         except Exception:
             return None
 
-        digest = hashlib.sha256(raw_bytes).hexdigest()
+        digest = hashlib.sha256(
+            raw_bytes
+        ).hexdigest()
 
         record = ResolvedRecord(
             ref=ref,
@@ -254,105 +320,196 @@ class RecordResolver:
         return record
 
 
-def resolve_index_path(raw_path: str) -> Path:
-    candidate = (REPO_ROOT / raw_path).resolve()
+def resolve_index_path(
+    raw_path: str,
+) -> Path:
+    candidate = (
+        REPO_ROOT
+        / raw_path
+    ).resolve()
+
     repo_root = REPO_ROOT.resolve()
 
     try:
         candidate.relative_to(repo_root)
     except ValueError as exc:
         raise ValueError(
-            f"record path escapes repository root: {raw_path}"
+            "record path escapes "
+            f"repository root: {raw_path}"
         ) from exc
 
     return candidate
 
 
-def load_record_resolver() -> RecordResolver:
+def auto_register_pass_bundles(
+    index: dict[str, Path],
+) -> int:
+    """
+    v0.5 Weight Assessments refer to v0.4 bundles through:
+
+        trace://contribution-bundles/<bundle_id>
+
+    Bundle examples live in examples/pass/, so register them
+    automatically as locally resolvable records.
+    """
+
+    count = 0
+
+    for path in sorted(
+        PASS_DIR.glob("*.yaml")
+    ):
+        try:
+            data = load_yaml(path)
+        except Exception:
+            continue
+
+        if not isinstance(data, dict):
+            continue
+
+        if (
+            data.get("protocol")
+            != "causal-contribution-bundle"
+        ):
+            continue
+
+        bundle_id = data.get("bundle_id")
+
+        if not isinstance(bundle_id, str):
+            continue
+
+        ref = (
+            "trace://contribution-bundles/"
+            f"{bundle_id}"
+        )
+
+        if ref not in index:
+            index[ref] = path.resolve()
+            count += 1
+
+    return count
+
+
+def load_record_resolver(
+) -> RecordResolver:
     print()
     print("=== RECORD RESOLVER ===")
 
-    if not RECORD_INDEX_PATH.exists():
-        print(
-            "[resolver-warning] "
-            "examples/records/index.yaml not found"
-        )
-
-        return RecordResolver({})
-
-    try:
-        index_data = load_yaml(RECORD_INDEX_PATH)
-    except Exception as exc:
-        print(f"[resolver-index-error] {exc}")
-        raise SystemExit(1)
-
-    if not isinstance(index_data, dict):
-        print(
-            "[resolver-index-error] "
-            "record index root must be an object"
-        )
-        raise SystemExit(1)
-
-    records = index_data.get("records")
-
-    if not isinstance(records, list):
-        print(
-            "[resolver-index-error] "
-            "'records' must be an array"
-        )
-        raise SystemExit(1)
-
     index: dict[str, Path] = {}
 
-    for position, entry in enumerate(records):
-        if not isinstance(entry, dict):
-            print(
-                "[resolver-index-error] "
-                f"records[{position}] must be an object"
-            )
-            raise SystemExit(1)
-
-        ref = entry.get("ref")
-        raw_path = entry.get("path")
-
-        if not isinstance(ref, str):
-            print(
-                "[resolver-index-error] "
-                f"records[{position}].ref must be a string"
-            )
-            raise SystemExit(1)
-
-        if not isinstance(raw_path, str):
-            print(
-                "[resolver-index-error] "
-                f"records[{position}].path must be a string"
-            )
-            raise SystemExit(1)
-
-        if ref in index:
-            print(
-                "[resolver-index-error] "
-                f"duplicate record ref: {ref}"
-            )
-            raise SystemExit(1)
-
+    if RECORD_INDEX_PATH.exists():
         try:
-            index[ref] = resolve_index_path(raw_path)
-        except ValueError as exc:
-            print(f"[resolver-index-error] {exc}")
+            index_data = load_yaml(
+                RECORD_INDEX_PATH
+            )
+        except Exception as exc:
+            print(
+                f"[resolver-index-error] {exc}"
+            )
             raise SystemExit(1)
+
+        if not isinstance(
+            index_data,
+            dict,
+        ):
+            print(
+                "[resolver-index-error] "
+                "record index root must "
+                "be an object"
+            )
+            raise SystemExit(1)
+
+        records = index_data.get("records")
+
+        if not isinstance(records, list):
+            print(
+                "[resolver-index-error] "
+                "'records' must be an array"
+            )
+            raise SystemExit(1)
+
+        for position, entry in enumerate(
+            records
+        ):
+            if not isinstance(entry, dict):
+                print(
+                    "[resolver-index-error] "
+                    f"records[{position}] "
+                    "must be an object"
+                )
+                raise SystemExit(1)
+
+            ref = entry.get("ref")
+            raw_path = entry.get("path")
+
+            if not isinstance(ref, str):
+                print(
+                    "[resolver-index-error] "
+                    f"records[{position}].ref "
+                    "must be a string"
+                )
+                raise SystemExit(1)
+
+            if not isinstance(
+                raw_path,
+                str,
+            ):
+                print(
+                    "[resolver-index-error] "
+                    f"records[{position}].path "
+                    "must be a string"
+                )
+                raise SystemExit(1)
+
+            if ref in index:
+                print(
+                    "[resolver-index-error] "
+                    f"duplicate record ref: {ref}"
+                )
+                raise SystemExit(1)
+
+            try:
+                index[ref] = (
+                    resolve_index_path(
+                        raw_path
+                    )
+                )
+            except ValueError as exc:
+                print(
+                    "[resolver-index-error] "
+                    f"{exc}"
+                )
+                raise SystemExit(1)
+
+    else:
+        print(
+            "[resolver-warning] "
+            "examples/records/index.yaml "
+            "not found"
+        )
+
+    bundle_count = (
+        auto_register_pass_bundles(
+            index
+        )
+    )
 
     print(
         "[resolver-ok] "
         f"registered records: {len(index)}"
     )
 
+    if bundle_count:
+        print(
+            "[resolver-bundles] "
+            f"auto-registered: {bundle_count}"
+        )
+
     return RecordResolver(index)
 
 
-# ---------------------------------------------------------------------------
-# Receipt semantic validation
-# ---------------------------------------------------------------------------
+# ============================================================
+# RECEIPT SEMANTICS
+# ============================================================
 
 
 def validate_receipt_semantics(
@@ -360,25 +517,51 @@ def validate_receipt_semantics(
 ) -> list[str]:
     errors: list[str] = []
 
-    counterfactual = data.get("counterfactual")
+    counterfactual = data.get(
+        "counterfactual"
+    )
 
-    if not isinstance(counterfactual, dict):
+    if not isinstance(
+        counterfactual,
+        dict,
+    ):
         return errors
 
-    baseline = counterfactual.get("baseline", {})
+    baseline = counterfactual.get(
+        "baseline",
+        {},
+    )
+
     without = counterfactual.get(
         "without_contributor",
         {},
     )
 
-    baseline_score = baseline.get("quality_score")
-    without_score = without.get("quality_score")
-    observed_delta = counterfactual.get("observed_delta")
+    baseline_score = baseline.get(
+        "quality_score"
+    )
+
+    without_score = without.get(
+        "quality_score"
+    )
+
+    observed_delta = counterfactual.get(
+        "observed_delta"
+    )
 
     if (
-        isinstance(baseline_score, (int, float))
-        and isinstance(without_score, (int, float))
-        and isinstance(observed_delta, (int, float))
+        isinstance(
+            baseline_score,
+            (int, float),
+        )
+        and isinstance(
+            without_score,
+            (int, float),
+        )
+        and isinstance(
+            observed_delta,
+            (int, float),
+        )
     ):
         expected_delta = (
             float(baseline_score)
@@ -390,17 +573,20 @@ def validate_receipt_semantics(
             float(observed_delta),
         ):
             errors.append(
-                "counterfactual.observed_delta "
-                f"expected {expected_delta:.12g} "
-                f"but found {observed_delta}"
+                "counterfactual."
+                "observed_delta "
+                f"expected "
+                f"{expected_delta:.12g} "
+                f"but found "
+                f"{observed_delta}"
             )
 
     return errors
 
 
-# ---------------------------------------------------------------------------
-# Interaction semantic validation
-# ---------------------------------------------------------------------------
+# ============================================================
+# INTERACTION SEMANTICS
+# ============================================================
 
 
 def validate_interaction_semantics(
@@ -408,54 +594,106 @@ def validate_interaction_semantics(
 ) -> list[str]:
     errors: list[str] = []
 
-    contributors = data.get("contributors", [])
+    contributors = data.get(
+        "contributors",
+        [],
+    )
+
     contributor_ids: list[str] = []
 
     if isinstance(contributors, list):
         for contributor in contributors:
-            if not isinstance(contributor, dict):
+            if not isinstance(
+                contributor,
+                dict,
+            ):
                 continue
 
-            contributor_id = contributor.get("contributor_id")
+            contributor_id = (
+                contributor.get(
+                    "contributor_id"
+                )
+            )
 
-            if isinstance(contributor_id, str):
-                contributor_ids.append(contributor_id)
+            if isinstance(
+                contributor_id,
+                str,
+            ):
+                contributor_ids.append(
+                    contributor_id
+                )
 
-    for duplicate in duplicate_values(contributor_ids):
+    for duplicate in duplicate_values(
+        contributor_ids
+    ):
         errors.append(
-            f"duplicate contributor_id: {duplicate}"
+            "duplicate contributor_id: "
+            f"{duplicate}"
         )
 
-    counterfactual = data.get("counterfactual")
+    counterfactual = data.get(
+        "counterfactual"
+    )
 
-    if not isinstance(counterfactual, dict):
+    if not isinstance(
+        counterfactual,
+        dict,
+    ):
         return errors
 
-    method = counterfactual.get("method")
+    method = counterfactual.get(
+        "method"
+    )
 
     if (
-        method in {
+        method
+        in {
             "pairwise_ablation",
             "substitution_test",
         }
         and len(contributor_ids) != 2
     ):
         errors.append(
-            f"{method} requires exactly 2 contributors "
-            f"but found {len(contributor_ids)}"
+            f"{method} requires exactly "
+            "2 contributors but found "
+            f"{len(contributor_ids)}"
         )
 
-    baseline = counterfactual.get("baseline", {})
-    comparison = counterfactual.get("comparison", {})
+    baseline = counterfactual.get(
+        "baseline",
+        {},
+    )
 
-    baseline_score = baseline.get("quality_score")
-    comparison_score = comparison.get("quality_score")
-    observed_delta = counterfactual.get("observed_delta")
+    comparison = counterfactual.get(
+        "comparison",
+        {},
+    )
+
+    baseline_score = baseline.get(
+        "quality_score"
+    )
+
+    comparison_score = comparison.get(
+        "quality_score"
+    )
+
+    observed_delta = counterfactual.get(
+        "observed_delta"
+    )
 
     if (
-        isinstance(baseline_score, (int, float))
-        and isinstance(comparison_score, (int, float))
-        and isinstance(observed_delta, (int, float))
+        isinstance(
+            baseline_score,
+            (int, float),
+        )
+        and isinstance(
+            comparison_score,
+            (int, float),
+        )
+        and isinstance(
+            observed_delta,
+            (int, float),
+        )
     ):
         expected_delta = (
             float(baseline_score)
@@ -467,36 +705,29 @@ def validate_interaction_semantics(
             float(observed_delta),
         ):
             errors.append(
-                "counterfactual.observed_delta "
-                f"expected {expected_delta:.12g} "
-                f"but found {observed_delta}"
+                "counterfactual."
+                "observed_delta "
+                f"expected "
+                f"{expected_delta:.12g} "
+                f"but found "
+                f"{observed_delta}"
             )
 
     return errors
 
 
-# ---------------------------------------------------------------------------
-# Graph semantic validation
-# ---------------------------------------------------------------------------
-
-
-def duplicate_values(values: list[str]) -> list[str]:
-    seen: set[str] = set()
-    duplicates: set[str] = set()
-
-    for value in values:
-        if value in seen:
-            duplicates.add(value)
-        else:
-            seen.add(value)
-
-    return sorted(duplicates)
+# ============================================================
+# GRAPH SEMANTICS
+# ============================================================
 
 
 def build_node_map(
     nodes: list[Any],
 ) -> dict[str, dict[str, Any]]:
-    result: dict[str, dict[str, Any]] = {}
+    result: dict[
+        str,
+        dict[str, Any],
+    ] = {}
 
     for node in nodes:
         if not isinstance(node, dict):
@@ -526,31 +757,52 @@ def validate_graph_ids(
         node["node_id"]
         for node in nodes
         if isinstance(node, dict)
-        and isinstance(node.get("node_id"), str)
+        and isinstance(
+            node.get("node_id"),
+            str,
+        )
     ]
 
     edge_ids = [
         edge["edge_id"]
         for edge in edges
         if isinstance(edge, dict)
-        and isinstance(edge.get("edge_id"), str)
+        and isinstance(
+            edge.get("edge_id"),
+            str,
+        )
     ]
 
     path_ids = [
         path["path_id"]
         for path in paths
         if isinstance(path, dict)
-        and isinstance(path.get("path_id"), str)
+        and isinstance(
+            path.get("path_id"),
+            str,
+        )
     ]
 
-    for value in duplicate_values(node_ids):
-        errors.append(f"duplicate node_id: {value}")
+    for value in duplicate_values(
+        node_ids
+    ):
+        errors.append(
+            f"duplicate node_id: {value}"
+        )
 
-    for value in duplicate_values(edge_ids):
-        errors.append(f"duplicate edge_id: {value}")
+    for value in duplicate_values(
+        edge_ids
+    ):
+        errors.append(
+            f"duplicate edge_id: {value}"
+        )
 
-    for value in duplicate_values(path_ids):
-        errors.append(f"duplicate path_id: {value}")
+    for value in duplicate_values(
+        path_ids
+    ):
+        errors.append(
+            f"duplicate path_id: {value}"
+        )
 
     return errors
 
@@ -571,7 +823,11 @@ def validate_graph_references(
         if not isinstance(edge, dict):
             continue
 
-        edge_id = edge.get("edge_id", "<unknown>")
+        edge_id = edge.get(
+            "edge_id",
+            "<unknown>",
+        )
+
         source = edge.get("from")
         destination = edge.get("to")
 
@@ -580,37 +836,56 @@ def validate_graph_references(
             and source not in node_ids
         ):
             errors.append(
-                f"edge {edge_id} references unknown "
+                f"edge {edge_id} "
+                "references unknown "
                 f"source node: {source}"
             )
 
         if (
-            isinstance(destination, str)
-            and destination not in node_ids
+            isinstance(
+                destination,
+                str,
+            )
+            and destination
+            not in node_ids
         ):
             errors.append(
-                f"edge {edge_id} references unknown "
-                f"destination node: {destination}"
+                f"edge {edge_id} "
+                "references unknown "
+                "destination node: "
+                f"{destination}"
             )
 
     for path in paths:
         if not isinstance(path, dict):
             continue
 
-        path_id = path.get("path_id", "<unknown>")
-        path_nodes = path.get("node_ids", [])
+        path_id = path.get(
+            "path_id",
+            "<unknown>",
+        )
 
-        if not isinstance(path_nodes, list):
+        path_nodes = path.get(
+            "node_ids",
+            [],
+        )
+
+        if not isinstance(
+            path_nodes,
+            list,
+        ):
             continue
 
         for node_id in path_nodes:
             if (
                 isinstance(node_id, str)
-                and node_id not in node_ids
+                and node_id
+                not in node_ids
             ):
                 errors.append(
-                    f"path {path_id} references "
-                    f"unknown node: {node_id}"
+                    f"path {path_id} "
+                    "references unknown "
+                    f"node: {node_id}"
                 )
 
     return errors
@@ -621,21 +896,33 @@ def validate_graph_outcome(
 ) -> list[str]:
     errors: list[str] = []
 
-    outcome = data.get("outcome", {})
-    outcome_ref = outcome.get("outcome_ref")
+    outcome = data.get(
+        "outcome",
+        {},
+    )
+
+    outcome_ref = outcome.get(
+        "outcome_ref"
+    )
 
     matching = [
         node
-        for node in data.get("nodes", [])
+        for node in data.get(
+            "nodes",
+            [],
+        )
         if isinstance(node, dict)
-        and node.get("node_type") == "outcome"
-        and node.get("ref") == outcome_ref
+        and node.get("node_type")
+        == "outcome"
+        and node.get("ref")
+        == outcome_ref
     ]
 
     if not matching:
         errors.append(
-            "graph outcome does not resolve to an "
-            "outcome node with matching outcome_ref"
+            "graph outcome does not "
+            "resolve to an outcome node "
+            "with matching outcome_ref"
         )
 
     return errors
@@ -650,49 +937,89 @@ def validate_edge_directions(
         data.get("nodes", [])
     )
 
-    for edge in data.get("edges", []):
+    for edge in data.get(
+        "edges",
+        [],
+    ):
         if not isinstance(edge, dict):
             continue
 
-        edge_id = edge.get("edge_id", "<unknown>")
+        edge_id = edge.get(
+            "edge_id",
+            "<unknown>",
+        )
+
         source_id = edge.get("from")
         destination_id = edge.get("to")
         relation = edge.get("relation")
 
         if (
-            not isinstance(source_id, str)
-            or not isinstance(destination_id, str)
+            not isinstance(
+                source_id,
+                str,
+            )
+            or not isinstance(
+                destination_id,
+                str,
+            )
         ):
             continue
 
-        source = node_map.get(source_id)
-        destination = node_map.get(destination_id)
+        source = node_map.get(
+            source_id
+        )
 
-        if source is None or destination is None:
+        destination = node_map.get(
+            destination_id
+        )
+
+        if (
+            source is None
+            or destination is None
+        ):
             continue
 
-        source_type = source.get("node_type")
-        destination_type = destination.get("node_type")
+        source_type = source.get(
+            "node_type"
+        )
+
+        destination_type = (
+            destination.get(
+                "node_type"
+            )
+        )
 
         if source_type == "outcome":
             errors.append(
-                f"edge {edge_id} has invalid causal direction: "
-                f"outcome node {source_id} cannot be a source"
+                f"edge {edge_id} has "
+                "invalid causal direction: "
+                f"outcome node {source_id} "
+                "cannot be a source"
             )
             continue
 
         if relation == "contributed_to":
-            if destination_type != "outcome":
+            if (
+                destination_type
+                != "outcome"
+            ):
                 errors.append(
-                    "invalid edge direction for contributed_to: "
-                    f"{source_type} -> {destination_type}"
+                    "invalid edge direction "
+                    "for contributed_to: "
+                    f"{source_type} -> "
+                    f"{destination_type}"
                 )
 
         elif relation == "participates_in":
-            if destination_type != "contribution_interaction":
+            if (
+                destination_type
+                != "contribution_interaction"
+            ):
                 errors.append(
-                    "invalid edge direction for participates_in: "
-                    f"{source_type} -> {destination_type}"
+                    "invalid edge direction "
+                    "for participates_in: "
+                    f"{source_type} -> "
+                    f"{destination_type}"
                 )
 
             if source_type not in {
@@ -700,22 +1027,34 @@ def validate_edge_directions(
                 "contribution_receipt",
             }:
                 errors.append(
-                    "participates_in must originate from "
-                    "contributor or contribution_receipt"
+                    "participates_in must "
+                    "originate from "
+                    "contributor or "
+                    "contribution_receipt"
                 )
 
         elif relation == "supported_by":
-            if destination_type != "evidence":
+            if (
+                destination_type
+                != "evidence"
+            ):
                 errors.append(
-                    "invalid edge direction for supported_by: "
-                    f"{source_type} -> {destination_type}"
+                    "invalid edge direction "
+                    "for supported_by: "
+                    f"{source_type} -> "
+                    f"{destination_type}"
                 )
 
         elif relation == "verified_by":
-            if destination_type != "evidence":
+            if (
+                destination_type
+                != "evidence"
+            ):
                 errors.append(
-                    "invalid edge direction for verified_by: "
-                    f"{source_type} -> {destination_type}"
+                    "invalid edge direction "
+                    "for verified_by: "
+                    f"{source_type} -> "
+                    f"{destination_type}"
                 )
 
     return errors
@@ -733,44 +1072,86 @@ def validate_graph_paths(
     node_map = build_node_map(nodes)
 
     directed_edges = {
-        (edge.get("from"), edge.get("to"))
+        (
+            edge.get("from"),
+            edge.get("to"),
+        )
         for edge in edges
         if isinstance(edge, dict)
-        and isinstance(edge.get("from"), str)
-        and isinstance(edge.get("to"), str)
+        and isinstance(
+            edge.get("from"),
+            str,
+        )
+        and isinstance(
+            edge.get("to"),
+            str,
+        )
     }
 
     graph_outcome_ref = (
-        data.get("outcome", {}).get("outcome_ref")
+        data.get(
+            "outcome",
+            {},
+        ).get(
+            "outcome_ref"
+        )
     )
 
     for path in paths:
         if not isinstance(path, dict):
             continue
 
-        path_id = path.get("path_id", "<unknown>")
-        node_ids = path.get("node_ids", [])
+        path_id = path.get(
+            "path_id",
+            "<unknown>",
+        )
 
-        if not isinstance(node_ids, list):
+        node_ids = path.get(
+            "node_ids",
+            [],
+        )
+
+        if not isinstance(
+            node_ids,
+            list,
+        ):
             continue
 
-        for index in range(len(node_ids) - 1):
+        for index in range(
+            len(node_ids) - 1
+        ):
             source = node_ids[index]
-            destination = node_ids[index + 1]
+            destination = (
+                node_ids[index + 1]
+            )
 
-            if (source, destination) not in directed_edges:
+            if (
+                source,
+                destination,
+            ) not in directed_edges:
                 errors.append(
-                    f"path {path_id} is not contiguous: "
-                    f"missing edge {source} -> {destination}"
+                    f"path {path_id} is "
+                    "not contiguous: "
+                    "missing edge "
+                    f"{source} -> "
+                    f"{destination}"
                 )
 
         if node_ids:
-            final_node = node_map.get(node_ids[-1])
+            final_node = node_map.get(
+                node_ids[-1]
+            )
 
             if final_node is not None:
-                if final_node.get("node_type") != "outcome":
+                if (
+                    final_node.get(
+                        "node_type"
+                    )
+                    != "outcome"
+                ):
                     errors.append(
-                        f"path {path_id} does not terminate "
+                        f"path {path_id} "
+                        "does not terminate "
                         "at an outcome node"
                     )
 
@@ -779,8 +1160,10 @@ def validate_graph_paths(
                     != graph_outcome_ref
                 ):
                     errors.append(
-                        f"path {path_id} terminates at an "
-                        "outcome different from graph outcome"
+                        f"path {path_id} "
+                        "terminates at an "
+                        "outcome different "
+                        "from graph outcome"
                     )
 
     return errors
@@ -793,12 +1176,18 @@ def find_cycle(
         data.get("nodes", [])
     )
 
-    adjacency: dict[str, list[str]] = {
+    adjacency: dict[
+        str,
+        list[str],
+    ] = {
         node_id: []
         for node_id in node_map
     }
 
-    for edge in data.get("edges", []):
+    for edge in data.get(
+        "edges",
+        [],
+    ):
         if not isinstance(edge, dict):
             continue
 
@@ -807,11 +1196,17 @@ def find_cycle(
 
         if (
             isinstance(source, str)
-            and isinstance(destination, str)
+            and isinstance(
+                destination,
+                str,
+            )
             and source in adjacency
-            and destination in adjacency
+            and destination
+            in adjacency
         ):
-            adjacency[source].append(destination)
+            adjacency[source].append(
+                destination
+            )
 
     state = {
         node_id: 0
@@ -821,12 +1216,20 @@ def find_cycle(
     stack: list[str] = []
     stack_index: dict[str, int] = {}
 
-    def dfs(node_id: str) -> list[str] | None:
+    def dfs(
+        node_id: str,
+    ) -> list[str] | None:
         state[node_id] = 1
-        stack_index[node_id] = len(stack)
+
+        stack_index[node_id] = (
+            len(stack)
+        )
+
         stack.append(node_id)
 
-        for neighbor in adjacency[node_id]:
+        for neighbor in adjacency[
+            node_id
+        ]:
             if state[neighbor] == 0:
                 cycle = dfs(neighbor)
 
@@ -834,7 +1237,9 @@ def find_cycle(
                     return cycle
 
             elif state[neighbor] == 1:
-                start = stack_index[neighbor]
+                start = stack_index[
+                    neighbor
+                ]
 
                 return (
                     stack[start:]
@@ -842,7 +1247,12 @@ def find_cycle(
                 )
 
         stack.pop()
-        stack_index.pop(node_id, None)
+
+        stack_index.pop(
+            node_id,
+            None,
+        )
+
         state[node_id] = 2
 
         return None
@@ -878,9 +1288,14 @@ def validate_graph_assessment(
 ) -> list[str]:
     errors: list[str] = []
 
-    assessment = data.get("graph_assessment")
+    assessment = data.get(
+        "graph_assessment"
+    )
 
-    if not isinstance(assessment, dict):
+    if not isinstance(
+        assessment,
+        dict,
+    ):
         return errors
 
     status_counts = {
@@ -889,31 +1304,45 @@ def validate_graph_assessment(
         "unresolved": 0,
     }
 
-    for edge in data.get("edges", []):
+    for edge in data.get(
+        "edges",
+        [],
+    ):
         if not isinstance(edge, dict):
             continue
 
-        status = edge.get("verification_status")
+        status = edge.get(
+            "verification_status"
+        )
 
         if status in status_counts:
             status_counts[status] += 1
 
     unresolved_segments = sum(
         1
-        for node in data.get("nodes", [])
+        for node in data.get(
+            "nodes",
+            [],
+        )
         if isinstance(node, dict)
         and node.get("node_type")
         == "unresolved_segment"
     )
 
     expected = {
-        "verified_edge_count": status_counts["verified"],
-        "partial_edge_count": status_counts["partial"],
-        "unresolved_edge_count": status_counts["unresolved"],
-        "unresolved_segment_count": unresolved_segments,
+        "verified_edge_count":
+            status_counts["verified"],
+        "partial_edge_count":
+            status_counts["partial"],
+        "unresolved_edge_count":
+            status_counts["unresolved"],
+        "unresolved_segment_count":
+            unresolved_segments,
     }
 
-    for field, expected_value in expected.items():
+    for field, expected_value in (
+        expected.items()
+    ):
         actual = assessment.get(field)
 
         if actual is None:
@@ -921,8 +1350,9 @@ def validate_graph_assessment(
 
         if actual != expected_value:
             errors.append(
-                f"graph_assessment.{field} "
-                f"expected {expected_value} "
+                f"graph_assessment."
+                f"{field} expected "
+                f"{expected_value} "
                 f"but found {actual}"
             )
 
@@ -934,8 +1364,11 @@ def validate_graph_semantics(
 ) -> list[str]:
     errors: list[str] = []
 
-    graph_validators: list[
-        Callable[[dict[str, Any]], list[str]]
+    validators: list[
+        Callable[
+            [dict[str, Any]],
+            list[str],
+        ]
     ] = [
         validate_graph_ids,
         validate_graph_references,
@@ -946,15 +1379,17 @@ def validate_graph_semantics(
         validate_graph_assessment,
     ]
 
-    for validator in graph_validators:
-        errors.extend(validator(data))
+    for validator in validators:
+        errors.extend(
+            validator(data)
+        )
 
     return errors
 
 
-# ---------------------------------------------------------------------------
-# Bundle semantic validation
-# ---------------------------------------------------------------------------
+# ============================================================
+# BUNDLE SEMANTICS
+# ============================================================
 
 
 def validate_bundle_semantics(
@@ -964,7 +1399,10 @@ def validate_bundle_semantics(
 
     refs: list[str] = []
 
-    graph_ref = data.get("graph_ref", {})
+    graph_ref = data.get(
+        "graph_ref",
+        {},
+    )
 
     if isinstance(graph_ref, dict):
         ref = graph_ref.get("ref")
@@ -972,36 +1410,391 @@ def validate_bundle_semantics(
         if isinstance(ref, str):
             refs.append(ref)
 
-    for field in (
+    receipt_refs = data.get(
         "receipt_refs",
-        "interaction_refs",
-        "evidence_refs",
+        [],
+    )
+
+    if isinstance(
+        receipt_refs,
+        list,
     ):
-        values = data.get(field, [])
-
-        if not isinstance(values, list):
-            continue
-
-        for value in values:
-            if not isinstance(value, dict):
+        for entry in receipt_refs:
+            if not isinstance(
+                entry,
+                dict,
+            ):
                 continue
 
-            ref = value.get("ref")
+            ref = entry.get("ref")
 
             if isinstance(ref, str):
                 refs.append(ref)
 
-    for duplicate in duplicate_values(refs):
+            if (
+                entry.get(
+                    "record_type"
+                )
+                != "contribution_receipt"
+            ):
+                errors.append(
+                    "receipt_refs entry "
+                    "must declare "
+                    "record_type="
+                    "contribution_receipt"
+                )
+
+    interaction_refs = data.get(
+        "interaction_refs",
+        [],
+    )
+
+    if isinstance(
+        interaction_refs,
+        list,
+    ):
+        for entry in interaction_refs:
+            if not isinstance(
+                entry,
+                dict,
+            ):
+                continue
+
+            ref = entry.get("ref")
+
+            if isinstance(ref, str):
+                refs.append(ref)
+
+            if (
+                entry.get(
+                    "record_type"
+                )
+                != "contribution_interaction"
+            ):
+                errors.append(
+                    "interaction_refs entry "
+                    "must declare "
+                    "record_type="
+                    "contribution_interaction"
+                )
+
+    evidence_refs = data.get(
+        "evidence_refs",
+        [],
+    )
+
+    if isinstance(
+        evidence_refs,
+        list,
+    ):
+        for entry in evidence_refs:
+            if not isinstance(
+                entry,
+                dict,
+            ):
+                continue
+
+            ref = entry.get("ref")
+
+            if isinstance(ref, str):
+                refs.append(ref)
+
+    for duplicate in duplicate_values(
+        refs
+    ):
         errors.append(
-            f"duplicate bundle reference: {duplicate}"
+            "duplicate bundle reference: "
+            f"{duplicate}"
         )
 
     return errors
 
 
+# ============================================================
+# v0.5 WEIGHT SEMANTICS
+# ============================================================
+
+
+def validate_weight_semantics(
+    data: dict[str, Any],
+) -> list[str]:
+    errors: list[str] = []
+
+    weights = data.get(
+        "weights",
+        [],
+    )
+
+    if not isinstance(weights, list):
+        return errors
+
+    weight_ids: list[str] = []
+    subject_refs: list[str] = []
+
+    estimated_total = 0.0
+    interaction_count = 0
+
+    for entry in weights:
+        if not isinstance(entry, dict):
+            continue
+
+        weight_id = entry.get(
+            "weight_id"
+        )
+
+        if isinstance(weight_id, str):
+            weight_ids.append(weight_id)
+
+        subject_ref = entry.get(
+            "subject_ref"
+        )
+
+        if isinstance(subject_ref, str):
+            subject_refs.append(
+                subject_ref
+            )
+
+        subject_type = entry.get(
+            "subject_type"
+        )
+
+        if (
+            subject_type
+            == "contribution_interaction"
+        ):
+            interaction_count += 1
+
+        estimated = entry.get(
+            "estimated_weight"
+        )
+
+        lower = entry.get(
+            "lower_bound"
+        )
+
+        upper = entry.get(
+            "upper_bound"
+        )
+
+        if isinstance(
+            estimated,
+            (int, float),
+        ):
+            estimated_total += float(
+                estimated
+            )
+
+        if (
+            isinstance(
+                lower,
+                (int, float),
+            )
+            and isinstance(
+                estimated,
+                (int, float),
+            )
+            and isinstance(
+                upper,
+                (int, float),
+            )
+        ):
+            if (
+                float(lower)
+                > float(estimated)
+                + EPSILON
+            ):
+                errors.append(
+                    f"{weight_id}: "
+                    "lower_bound exceeds "
+                    "estimated_weight"
+                )
+
+            if (
+                float(estimated)
+                > float(upper)
+                + EPSILON
+            ):
+                errors.append(
+                    f"{weight_id}: "
+                    "estimated_weight exceeds "
+                    "upper_bound"
+                )
+
+        interaction_adjustment = (
+            entry.get(
+                "interaction_adjustment"
+            )
+        )
+
+        if isinstance(
+            interaction_adjustment,
+            dict,
+        ):
+            applied = (
+                interaction_adjustment.get(
+                    "applied"
+                )
+            )
+
+            if (
+                applied is True
+                and subject_type
+                != "contribution_interaction"
+            ):
+                errors.append(
+                    "interaction contribution "
+                    "MUST NOT be assigned "
+                    "directly to an individual "
+                    "contribution subject: "
+                    f"{weight_id}"
+                )
+
+            if applied is False:
+                if (
+                    "adjustment"
+                    in interaction_adjustment
+                    or "interaction_refs"
+                    in interaction_adjustment
+                ):
+                    errors.append(
+                        f"{weight_id}: "
+                        "interaction_adjustment "
+                        "declares adjustment data "
+                        "while applied=false"
+                    )
+
+    for duplicate in duplicate_values(
+        weight_ids
+    ):
+        errors.append(
+            f"duplicate weight_id: {duplicate}"
+        )
+
+    for duplicate in duplicate_values(
+        subject_refs
+    ):
+        errors.append(
+            "duplicate contribution "
+            f"weight subject: {duplicate}"
+        )
+
+    if (
+        estimated_total
+        > 1.0 + EPSILON
+    ):
+        errors.append(
+            "estimated contribution "
+            "weight sum exceeds 1.0: "
+            f"{estimated_total:.12g}"
+        )
+
+    summary = data.get(
+        "assessment_summary",
+        {},
+    )
+
+    if isinstance(summary, dict):
+        known_weight = summary.get(
+            "known_weight"
+        )
+
+        if isinstance(
+            known_weight,
+            (int, float),
+        ):
+            if not approximately_equal(
+                estimated_total,
+                float(known_weight),
+            ):
+                errors.append(
+                    "assessment_summary."
+                    "known_weight expected "
+                    f"{estimated_total:.12g} "
+                    f"but found "
+                    f"{known_weight}"
+                )
+
+        subject_count = summary.get(
+            "subject_count"
+        )
+
+        if (
+            isinstance(
+                subject_count,
+                int,
+            )
+            and subject_count
+            != len(weights)
+        ):
+            errors.append(
+                "assessment_summary."
+                "subject_count expected "
+                f"{len(weights)} "
+                f"but found "
+                f"{subject_count}"
+            )
+
+        declared_interaction_count = (
+            summary.get(
+                "interaction_subject_count"
+            )
+        )
+
+        if (
+            isinstance(
+                declared_interaction_count,
+                int,
+            )
+            and declared_interaction_count
+            != interaction_count
+        ):
+            errors.append(
+                "assessment_summary."
+                "interaction_subject_count "
+                f"expected "
+                f"{interaction_count} "
+                f"but found "
+                f"{declared_interaction_count}"
+            )
+
+    unresolved_weight = data.get(
+        "unresolved_weight"
+    )
+
+    if isinstance(
+        unresolved_weight,
+        (int, float),
+    ):
+        total = (
+            estimated_total
+            + float(unresolved_weight)
+        )
+
+        if not approximately_equal(
+            total,
+            1.0,
+        ):
+            errors.append(
+                "known contribution weight "
+                "+ unresolved_weight "
+                "must equal 1.0: "
+                f"found {total:.12g}"
+            )
+
+    return errors
+
+
+# ============================================================
+# SEMANTIC ROUTING
+# ============================================================
+
+
 SEMANTIC_VALIDATORS: dict[
     str,
-    Callable[[dict[str, Any]], list[str]],
+    Callable[
+        [dict[str, Any]],
+        list[str],
+    ],
 ] = {
     "causal-contribution-receipt":
         validate_receipt_semantics,
@@ -1014,6 +1807,9 @@ SEMANTIC_VALIDATORS: dict[
 
     "causal-contribution-bundle":
         validate_bundle_semantics,
+
+    "causal-contribution-weight-assessment":
+        validate_weight_semantics,
 }
 
 
@@ -1021,12 +1817,17 @@ def run_semantic_validation(
     protocol: str,
     data: dict[str, Any],
 ) -> list[str]:
-    validator = SEMANTIC_VALIDATORS.get(protocol)
+    validator = (
+        SEMANTIC_VALIDATORS.get(
+            protocol
+        )
+    )
 
     if validator is None:
         return [
-            "no semantic validator registered "
-            f"for protocol: {protocol}"
+            "no semantic validator "
+            "registered for protocol: "
+            f"{protocol}"
         ]
 
     return validator(data)
@@ -1036,42 +1837,71 @@ def print_semantic_errors(
     errors: list[str],
 ) -> None:
     for error in errors:
-        print(f"[semantic-error] {error}")
+        print(
+            f"[semantic-error] {error}"
+        )
 
 
-# ---------------------------------------------------------------------------
-# Cross-record helpers
-# ---------------------------------------------------------------------------
+# ============================================================
+# CROSS-RECORD HELPERS
+# ============================================================
 
 
-def record_protocol(record: Any) -> str | None:
+def record_protocol(
+    record: Any,
+) -> str | None:
     if not isinstance(record, dict):
         return None
 
     value = record.get("protocol")
 
-    return value if isinstance(value, str) else None
+    if isinstance(value, str):
+        return value
+
+    return None
 
 
-def record_version(record: Any) -> str | None:
+def record_version(
+    record: Any,
+) -> str | None:
     if not isinstance(record, dict):
         return None
 
-    value = record.get("protocol_version")
+    value = record.get(
+        "protocol_version"
+    )
 
-    return value if isinstance(value, str) else None
+    if isinstance(value, str):
+        return value
+
+    return None
 
 
-def record_id(record: Any) -> str | None:
+def record_id(
+    record: Any,
+) -> str | None:
     if not isinstance(record, dict):
         return None
 
-    protocol = record_protocol(record)
+    protocol = record_protocol(
+        record
+    )
 
     fields = {
-        "causal-contribution-receipt": "receipt_id",
-        "causal-contribution-interaction": "interaction_id",
-        "causal-contribution-graph": "graph_id",
+        "causal-contribution-receipt":
+            "receipt_id",
+
+        "causal-contribution-interaction":
+            "interaction_id",
+
+        "causal-contribution-graph":
+            "graph_id",
+
+        "causal-contribution-bundle":
+            "bundle_id",
+
+        "causal-contribution-weight-assessment":
+            "assessment_id",
     }
 
     field = fields.get(protocol)
@@ -1081,7 +1911,10 @@ def record_id(record: Any) -> str | None:
 
     value = record.get(field)
 
-    return value if isinstance(value, str) else None
+    if isinstance(value, str):
+        return value
+
+    return None
 
 
 def record_outcome_id(
@@ -1093,11 +1926,24 @@ def record_outcome_id(
     outcome = record.get("outcome")
 
     if not isinstance(outcome, dict):
+        outcome = record.get(
+            "outcome_ref"
+        )
+
+    if not isinstance(
+        outcome,
+        dict,
+    ):
         return None
 
-    value = outcome.get("outcome_id")
+    value = outcome.get(
+        "outcome_id"
+    )
 
-    return value if isinstance(value, str) else None
+    if isinstance(value, str):
+        return value
+
+    return None
 
 
 def receipt_contributor_id(
@@ -1106,14 +1952,24 @@ def receipt_contributor_id(
     if not isinstance(record, dict):
         return None
 
-    contributor = record.get("contributor")
+    contributor = record.get(
+        "contributor"
+    )
 
-    if not isinstance(contributor, dict):
+    if not isinstance(
+        contributor,
+        dict,
+    ):
         return None
 
-    value = contributor.get("contributor_id")
+    value = contributor.get(
+        "contributor_id"
+    )
 
-    return value if isinstance(value, str) else None
+    if isinstance(value, str):
+        return value
+
+    return None
 
 
 def interaction_contributor_ids(
@@ -1124,19 +1980,37 @@ def interaction_contributor_ids(
     if not isinstance(record, dict):
         return result
 
-    contributors = record.get("contributors", [])
+    contributors = record.get(
+        "contributors",
+        [],
+    )
 
-    if not isinstance(contributors, list):
+    if not isinstance(
+        contributors,
+        list,
+    ):
         return result
 
     for contributor in contributors:
-        if not isinstance(contributor, dict):
+        if not isinstance(
+            contributor,
+            dict,
+        ):
             continue
 
-        contributor_id = contributor.get("contributor_id")
+        contributor_id = (
+            contributor.get(
+                "contributor_id"
+            )
+        )
 
-        if isinstance(contributor_id, str):
-            result.add(contributor_id)
+        if isinstance(
+            contributor_id,
+            str,
+        ):
+            result.add(
+                contributor_id
+            )
 
     return result
 
@@ -1144,9 +2018,13 @@ def interaction_contributor_ids(
 def collect_bundle_ref_entries(
     bundle: dict[str, Any],
 ) -> list[dict[str, Any]]:
-    entries: list[dict[str, Any]] = []
+    entries: list[
+        dict[str, Any]
+    ] = []
 
-    graph = bundle.get("graph_ref")
+    graph = bundle.get(
+        "graph_ref"
+    )
 
     if isinstance(graph, dict):
         entries.append(graph)
@@ -1156,14 +2034,25 @@ def collect_bundle_ref_entries(
         "interaction_refs",
         "evidence_refs",
     ):
-        values = bundle.get(field, [])
+        values = bundle.get(
+            field,
+            [],
+        )
 
-        if not isinstance(values, list):
+        if not isinstance(
+            values,
+            list,
+        ):
             continue
 
         for value in values:
-            if isinstance(value, dict):
-                entries.append(value)
+            if isinstance(
+                value,
+                dict,
+            ):
+                entries.append(
+                    value
+                )
 
     return entries
 
@@ -1173,7 +2062,10 @@ def get_entry_ref(
 ) -> str | None:
     ref = entry.get("ref")
 
-    return ref if isinstance(ref, str) else None
+    if isinstance(ref, str):
+        return ref
+
+    return None
 
 
 def validate_declared_digest(
@@ -1185,21 +2077,35 @@ def validate_declared_digest(
     if not isinstance(digest, dict):
         return None
 
-    algorithm = digest.get("algorithm")
-    declared_value = digest.get("value")
+    algorithm = digest.get(
+        "algorithm"
+    )
+
+    declared_value = digest.get(
+        "value"
+    )
 
     if algorithm != "sha256":
         return (
-            f"unsupported digest algorithm for "
-            f"{resolved.ref}: {algorithm}"
+            "unsupported digest "
+            f"algorithm for "
+            f"{resolved.ref}: "
+            f"{algorithm}"
         )
 
-    if not isinstance(declared_value, str):
+    if not isinstance(
+        declared_value,
+        str,
+    ):
         return (
-            f"invalid digest value for {resolved.ref}"
+            "invalid digest value "
+            f"for {resolved.ref}"
         )
 
-    if declared_value.lower() != resolved.sha256.lower():
+    if (
+        declared_value.lower()
+        != resolved.sha256.lower()
+    ):
         return (
             "digest mismatch for "
             f"{resolved.ref}"
@@ -1208,9 +2114,9 @@ def validate_declared_digest(
     return None
 
 
-# ---------------------------------------------------------------------------
-# Cross-record validation
-# ---------------------------------------------------------------------------
+# ============================================================
+# v0.4 BUNDLE CROSS-RECORD
+# ============================================================
 
 
 def validate_bundle_cross_records(
@@ -1219,27 +2125,48 @@ def validate_bundle_cross_records(
 ) -> list[str]:
     errors: list[str] = []
 
-    bundle_outcome = bundle.get("outcome_ref", {})
+    bundle_outcome = bundle.get(
+        "outcome_ref",
+        {},
+    )
+
     expected_outcome_id = (
-        bundle_outcome.get("outcome_id")
-        if isinstance(bundle_outcome, dict)
+        bundle_outcome.get(
+            "outcome_id"
+        )
+        if isinstance(
+            bundle_outcome,
+            dict,
+        )
         else None
     )
 
-    graph_entry = bundle.get("graph_ref", {})
-    receipt_entries = bundle.get("receipt_refs", [])
+    graph_entry = bundle.get(
+        "graph_ref",
+        {},
+    )
+
+    receipt_entries = bundle.get(
+        "receipt_refs",
+        [],
+    )
+
     interaction_entries = bundle.get(
         "interaction_refs",
         [],
     )
-    evidence_entries = bundle.get(
-        "evidence_refs",
-        [],
+
+    all_entries = (
+        collect_bundle_ref_entries(
+            bundle
+        )
     )
 
-    all_entries = collect_bundle_ref_entries(bundle)
+    resolved_by_ref: dict[
+        str,
+        ResolvedRecord,
+    ] = {}
 
-    resolved_by_ref: dict[str, ResolvedRecord] = {}
     unresolved_refs: list[str] = []
 
     for entry in all_entries:
@@ -1248,435 +2175,629 @@ def validate_bundle_cross_records(
         if ref is None:
             continue
 
-        resolved = resolver.resolve(ref)
+        resolved = resolver.resolve(
+            ref
+        )
 
         if resolved is None:
-            unresolved_refs.append(ref)
+            unresolved_refs.append(
+                ref
+            )
             continue
 
-        resolved_by_ref[ref] = resolved
+        resolved_by_ref[ref] = (
+            resolved
+        )
 
-        digest_error = validate_declared_digest(
-            entry,
-            resolved,
+        digest_error = (
+            validate_declared_digest(
+                entry,
+                resolved,
+            )
         )
 
         if digest_error is not None:
-            errors.append(digest_error)
-
-    # -------------------------------------------------------------------
-    # Coverage accounting
-    # -------------------------------------------------------------------
+            errors.append(
+                digest_error
+            )
 
     total_refs = len(all_entries)
-    resolved_count = len(resolved_by_ref)
+    resolved_count = len(
+        resolved_by_ref
+    )
 
     if total_refs > 0:
-        actual_reference_coverage = (
-            resolved_count / total_refs
+        reference_coverage = (
+            resolved_count
+            / total_refs
         )
 
         digest_count = sum(
             1
             for entry in all_entries
-            if isinstance(entry.get("digest"), dict)
+            if isinstance(
+                entry.get("digest"),
+                dict,
+            )
         )
 
-        actual_digest_coverage = (
-            digest_count / total_refs
+        digest_coverage = (
+            digest_count
+            / total_refs
         )
+
     else:
-        actual_reference_coverage = 1.0
-        actual_digest_coverage = 1.0
+        reference_coverage = 1.0
+        digest_coverage = 1.0
 
-    assessment = bundle.get("bundle_assessment")
+    assessment = bundle.get(
+        "bundle_assessment"
+    )
 
-    if isinstance(assessment, dict):
-        declared_reference_coverage = assessment.get(
-            "reference_coverage"
+    if isinstance(
+        assessment,
+        dict,
+    ):
+        declared_reference = (
+            assessment.get(
+                "reference_coverage"
+            )
         )
 
         if isinstance(
-            declared_reference_coverage,
+            declared_reference,
             (int, float),
         ):
             if not approximately_equal_coverage(
-                actual_reference_coverage,
-                float(declared_reference_coverage),
+                reference_coverage,
+                float(
+                    declared_reference
+                ),
             ):
                 errors.append(
-                    "bundle_assessment.reference_coverage "
+                    "bundle_assessment."
+                    "reference_coverage "
                     f"expected "
-                    f"{round(actual_reference_coverage, 2):.2f} "
+                    f"{round(reference_coverage, 2):.2f} "
                     f"but found "
-                    f"{declared_reference_coverage}"
+                    f"{declared_reference}"
                 )
 
-        declared_digest_coverage = assessment.get(
-            "digest_coverage"
+        declared_digest = (
+            assessment.get(
+                "digest_coverage"
+            )
         )
 
         if isinstance(
-            declared_digest_coverage,
+            declared_digest,
             (int, float),
         ):
             if not approximately_equal_coverage(
-                actual_digest_coverage,
-                float(declared_digest_coverage),
+                digest_coverage,
+                float(declared_digest),
             ):
                 errors.append(
-                    "bundle_assessment.digest_coverage "
+                    "bundle_assessment."
+                    "digest_coverage "
                     f"expected "
-                    f"{round(actual_digest_coverage, 2):.2f} "
+                    f"{round(digest_coverage, 2):.2f} "
                     f"but found "
-                    f"{declared_digest_coverage}"
+                    f"{declared_digest}"
                 )
 
-        declared_unresolved = assessment.get(
-            "unresolved_reference_count"
+        declared_unresolved = (
+            assessment.get(
+                "unresolved_reference_count"
+            )
         )
 
         if (
-            isinstance(declared_unresolved, int)
+            isinstance(
+                declared_unresolved,
+                int,
+            )
             and declared_unresolved
             != len(unresolved_refs)
         ):
             errors.append(
                 "bundle_assessment."
                 "unresolved_reference_count "
-                f"expected {len(unresolved_refs)} "
-                f"but found {declared_unresolved}"
+                f"expected "
+                f"{len(unresolved_refs)} "
+                f"but found "
+                f"{declared_unresolved}"
             )
-
-    # -------------------------------------------------------------------
-    # Graph must resolve
-    # -------------------------------------------------------------------
 
     graph_ref = (
         graph_entry.get("ref")
-        if isinstance(graph_entry, dict)
+        if isinstance(
+            graph_entry,
+            dict,
+        )
         else None
     )
 
-    graph_record: ResolvedRecord | None = None
+    graph_record: (
+        ResolvedRecord | None
+    ) = None
 
     if isinstance(graph_ref, str):
-        graph_record = resolved_by_ref.get(graph_ref)
+        graph_record = (
+            resolved_by_ref.get(
+                graph_ref
+            )
+        )
 
         if graph_record is None:
             errors.append(
-                f"unresolved graph reference: {graph_ref}"
+                "unresolved graph "
+                f"reference: {graph_ref}"
             )
-
-    # -------------------------------------------------------------------
-    # Receipt records must resolve
-    # -------------------------------------------------------------------
 
     resolved_receipts: dict[
         str,
         ResolvedRecord,
     ] = {}
 
-    for entry in receipt_entries:
-        if not isinstance(entry, dict):
-            continue
+    if isinstance(
+        receipt_entries,
+        list,
+    ):
+        for entry in receipt_entries:
+            if not isinstance(
+                entry,
+                dict,
+            ):
+                continue
 
-        ref = get_entry_ref(entry)
-
-        if ref is None:
-            continue
-
-        resolved = resolved_by_ref.get(ref)
-
-        if resolved is None:
-            errors.append(
-                f"unresolved external reference: {ref}"
-            )
-            continue
-
-        resolved_receipts[ref] = resolved
-
-        if (
-            record_protocol(resolved.data)
-            != "causal-contribution-receipt"
-        ):
-            errors.append(
-                f"record type mismatch for {ref}: "
-                "expected causal-contribution-receipt"
-            )
-            continue
-
-        actual_id = record_id(resolved.data)
-        declared_id = entry.get("record_id")
-
-        if (
-            isinstance(declared_id, str)
-            and actual_id != declared_id
-        ):
-            errors.append(
-                "receipt reference identity mismatch: "
-                f"expected {declared_id} "
-                f"but resolved {actual_id}"
+            ref = get_entry_ref(
+                entry
             )
 
-        actual_version = record_version(resolved.data)
-        declared_version = entry.get("protocol_version")
+            if ref is None:
+                continue
 
-        if (
-            isinstance(declared_version, str)
-            and actual_version != declared_version
-        ):
-            errors.append(
-                f"receipt {actual_id} version mismatch: "
-                f"expected {declared_version} "
-                f"but found {actual_version}"
+            resolved = (
+                resolved_by_ref.get(
+                    ref
+                )
             )
 
-        actual_contributor = receipt_contributor_id(
-            resolved.data
-        )
-        declared_contributor = entry.get(
-            "contributor_id"
-        )
+            if resolved is None:
+                errors.append(
+                    "unresolved external "
+                    f"reference: {ref}"
+                )
+                continue
 
-        if (
-            isinstance(declared_contributor, str)
-            and actual_contributor
-            != declared_contributor
-        ):
-            errors.append(
-                f"receipt {actual_id} "
-                "contributor mismatch: "
-                f"expected {declared_contributor} "
-                f"but found {actual_contributor}"
+            resolved_receipts[
+                ref
+            ] = resolved
+
+            if (
+                record_protocol(
+                    resolved.data
+                )
+                !=
+                "causal-contribution-receipt"
+            ):
+                errors.append(
+                    "record type mismatch "
+                    f"for {ref}: expected "
+                    "causal-contribution-receipt"
+                )
+                continue
+
+            actual_id = record_id(
+                resolved.data
             )
 
-        actual_outcome = record_outcome_id(
-            resolved.data
-        )
-        declared_outcome = entry.get("outcome_id")
-
-        if (
-            isinstance(declared_outcome, str)
-            and actual_outcome != declared_outcome
-        ):
-            errors.append(
-                f"receipt {actual_id} "
-                "declared outcome mismatch: "
-                f"expected {declared_outcome} "
-                f"but found {actual_outcome}"
+            declared_id = entry.get(
+                "record_id"
             )
 
-        if (
-            isinstance(expected_outcome_id, str)
-            and actual_outcome
-            != expected_outcome_id
-        ):
-            errors.append(
-                f"receipt {actual_id} "
-                "outcome mismatch: "
-                f"expected {expected_outcome_id} "
-                f"but found {actual_outcome}"
+            if (
+                isinstance(
+                    declared_id,
+                    str,
+                )
+                and actual_id
+                != declared_id
+            ):
+                errors.append(
+                    "receipt reference "
+                    "identity mismatch: "
+                    f"expected "
+                    f"{declared_id} "
+                    f"but resolved "
+                    f"{actual_id}"
+                )
+
+            actual_version = (
+                record_version(
+                    resolved.data
+                )
             )
 
-    # -------------------------------------------------------------------
-    # Interaction records must resolve
-    # -------------------------------------------------------------------
+            declared_version = (
+                entry.get(
+                    "protocol_version"
+                )
+            )
+
+            if (
+                isinstance(
+                    declared_version,
+                    str,
+                )
+                and actual_version
+                != declared_version
+            ):
+                errors.append(
+                    f"receipt {actual_id} "
+                    "version mismatch: "
+                    f"expected "
+                    f"{declared_version} "
+                    f"but found "
+                    f"{actual_version}"
+                )
+
+            actual_contributor = (
+                receipt_contributor_id(
+                    resolved.data
+                )
+            )
+
+            declared_contributor = (
+                entry.get(
+                    "contributor_id"
+                )
+            )
+
+            if (
+                isinstance(
+                    declared_contributor,
+                    str,
+                )
+                and actual_contributor
+                != declared_contributor
+            ):
+                errors.append(
+                    f"receipt {actual_id} "
+                    "contributor mismatch: "
+                    f"expected "
+                    f"{declared_contributor} "
+                    f"but found "
+                    f"{actual_contributor}"
+                )
+
+            actual_outcome = (
+                record_outcome_id(
+                    resolved.data
+                )
+            )
+
+            declared_outcome = (
+                entry.get(
+                    "outcome_id"
+                )
+            )
+
+            if (
+                isinstance(
+                    declared_outcome,
+                    str,
+                )
+                and actual_outcome
+                != declared_outcome
+            ):
+                errors.append(
+                    f"receipt {actual_id} "
+                    "declared outcome "
+                    "mismatch: expected "
+                    f"{declared_outcome} "
+                    f"but found "
+                    f"{actual_outcome}"
+                )
+
+            if (
+                isinstance(
+                    expected_outcome_id,
+                    str,
+                )
+                and actual_outcome
+                != expected_outcome_id
+            ):
+                errors.append(
+                    f"receipt {actual_id} "
+                    "outcome mismatch: "
+                    f"expected "
+                    f"{expected_outcome_id} "
+                    f"but found "
+                    f"{actual_outcome}"
+                )
 
     resolved_interactions: dict[
         str,
         ResolvedRecord,
     ] = {}
 
-    for entry in interaction_entries:
-        if not isinstance(entry, dict):
-            continue
-
-        ref = get_entry_ref(entry)
-
-        if ref is None:
-            continue
-
-        resolved = resolved_by_ref.get(ref)
-
-        if resolved is None:
-            errors.append(
-                f"unresolved external reference: {ref}"
-            )
-            continue
-
-        resolved_interactions[ref] = resolved
-
-        if (
-            record_protocol(resolved.data)
-            != "causal-contribution-interaction"
+    if isinstance(
+        interaction_entries,
+        list,
+    ):
+        for entry in (
+            interaction_entries
         ):
-            errors.append(
-                f"record type mismatch for {ref}: "
-                "expected "
+            if not isinstance(
+                entry,
+                dict,
+            ):
+                continue
+
+            ref = get_entry_ref(
+                entry
+            )
+
+            if ref is None:
+                continue
+
+            resolved = (
+                resolved_by_ref.get(
+                    ref
+                )
+            )
+
+            if resolved is None:
+                errors.append(
+                    "unresolved external "
+                    f"reference: {ref}"
+                )
+                continue
+
+            resolved_interactions[
+                ref
+            ] = resolved
+
+            if (
+                record_protocol(
+                    resolved.data
+                )
+                !=
                 "causal-contribution-interaction"
-            )
-            continue
+            ):
+                errors.append(
+                    "record type mismatch "
+                    f"for {ref}: expected "
+                    "causal-contribution-"
+                    "interaction"
+                )
+                continue
 
-        actual_id = record_id(resolved.data)
-        declared_id = entry.get("record_id")
-
-        if (
-            isinstance(declared_id, str)
-            and actual_id != declared_id
-        ):
-            errors.append(
-                "interaction reference identity mismatch: "
-                f"expected {declared_id} "
-                f"but resolved {actual_id}"
+            actual_id = record_id(
+                resolved.data
             )
 
-        actual_version = record_version(resolved.data)
-        declared_version = entry.get("protocol_version")
-
-        if (
-            isinstance(declared_version, str)
-            and actual_version != declared_version
-        ):
-            errors.append(
-                f"interaction {actual_id} "
-                "version mismatch: "
-                f"expected {declared_version} "
-                f"but found {actual_version}"
+            declared_id = entry.get(
+                "record_id"
             )
 
-        actual_outcome = record_outcome_id(
-            resolved.data
+            if (
+                isinstance(
+                    declared_id,
+                    str,
+                )
+                and actual_id
+                != declared_id
+            ):
+                errors.append(
+                    "interaction reference "
+                    "identity mismatch: "
+                    f"expected "
+                    f"{declared_id} "
+                    f"but resolved "
+                    f"{actual_id}"
+                )
+
+            actual_version = (
+                record_version(
+                    resolved.data
+                )
+            )
+
+            declared_version = (
+                entry.get(
+                    "protocol_version"
+                )
+            )
+
+            if (
+                isinstance(
+                    declared_version,
+                    str,
+                )
+                and actual_version
+                != declared_version
+            ):
+                errors.append(
+                    f"interaction "
+                    f"{actual_id} "
+                    "version mismatch: "
+                    f"expected "
+                    f"{declared_version} "
+                    f"but found "
+                    f"{actual_version}"
+                )
+
+            actual_outcome = (
+                record_outcome_id(
+                    resolved.data
+                )
+            )
+
+            declared_outcome = (
+                entry.get(
+                    "outcome_id"
+                )
+            )
+
+            if (
+                isinstance(
+                    declared_outcome,
+                    str,
+                )
+                and actual_outcome
+                != declared_outcome
+            ):
+                errors.append(
+                    f"interaction "
+                    f"{actual_id} "
+                    "declared outcome "
+                    "mismatch: expected "
+                    f"{declared_outcome} "
+                    f"but found "
+                    f"{actual_outcome}"
+                )
+
+            if (
+                isinstance(
+                    expected_outcome_id,
+                    str,
+                )
+                and actual_outcome
+                != expected_outcome_id
+            ):
+                errors.append(
+                    f"interaction "
+                    f"{actual_id} "
+                    "outcome mismatch: "
+                    f"expected "
+                    f"{expected_outcome_id} "
+                    f"but found "
+                    f"{actual_outcome}"
+                )
+
+    if graph_record is not None:
+        graph_data = (
+            graph_record.data
         )
 
-        declared_outcome = entry.get("outcome_id")
-
         if (
-            isinstance(declared_outcome, str)
-            and actual_outcome != declared_outcome
+            record_protocol(
+                graph_data
+            )
+            !=
+            "causal-contribution-graph"
         ):
             errors.append(
-                f"interaction {actual_id} "
-                "declared outcome mismatch: "
-                f"expected {declared_outcome} "
-                f"but found {actual_outcome}"
+                "record type mismatch "
+                f"for {graph_ref}: expected "
+                "causal-contribution-graph"
             )
 
+        graph_outcome = (
+            record_outcome_id(
+                graph_data
+            )
+        )
+
         if (
-            isinstance(expected_outcome_id, str)
-            and actual_outcome
+            isinstance(
+                expected_outcome_id,
+                str,
+            )
+            and graph_outcome
             != expected_outcome_id
         ):
             errors.append(
-                f"interaction {actual_id} "
-                "outcome mismatch: "
-                f"expected {expected_outcome_id} "
-                f"but found {actual_outcome}"
-            )
-
-    # -------------------------------------------------------------------
-    # Graph consistency
-    # -------------------------------------------------------------------
-
-    if graph_record is not None:
-        graph_data = graph_record.data
-
-        if (
-            record_protocol(graph_data)
-            != "causal-contribution-graph"
-        ):
-            errors.append(
-                f"record type mismatch for {graph_ref}: "
-                "expected causal-contribution-graph"
-            )
-
-        graph_outcome = record_outcome_id(graph_data)
-
-        if (
-            isinstance(expected_outcome_id, str)
-            and graph_outcome != expected_outcome_id
-        ):
-            errors.append(
                 "graph outcome mismatch: "
-                f"expected {expected_outcome_id} "
-                f"but found {graph_outcome}"
+                f"expected "
+                f"{expected_outcome_id} "
+                f"but found "
+                f"{graph_outcome}"
             )
 
-        graph_nodes = graph_data.get("nodes", [])
+        graph_nodes = (
+            graph_data.get(
+                "nodes",
+                [],
+            )
+            if isinstance(
+                graph_data,
+                dict,
+            )
+            else []
+        )
 
-        if isinstance(graph_nodes, list):
+        if isinstance(
+            graph_nodes,
+            list,
+        ):
             for node in graph_nodes:
-                if not isinstance(node, dict):
+                if not isinstance(
+                    node,
+                    dict,
+                ):
                     continue
 
-                node_type = node.get("node_type")
-                node_ref = node.get("ref")
+                node_type = node.get(
+                    "node_type"
+                )
 
-                if not isinstance(node_ref, str):
+                node_ref = node.get(
+                    "ref"
+                )
+
+                if not isinstance(
+                    node_ref,
+                    str,
+                ):
                     continue
 
-                if node_type == "contribution_receipt":
-                    if node_ref not in resolved_receipts:
-                        errors.append(
-                            "graph references receipt not "
-                            f"resolved by bundle: {node_ref}"
-                        )
-                        continue
-
-                    resolved = resolved_receipts[node_ref]
-                    actual_contributor = (
-                        receipt_contributor_id(
-                            resolved.data
-                        )
-                    )
-
-                    graph_contributor = node.get(
-                        "contributor_id"
-                    )
-
+                if (
+                    node_type
+                    == "contribution_receipt"
+                ):
                     if (
-                        isinstance(
-                            graph_contributor,
-                            str,
-                        )
-                        and actual_contributor
-                        != graph_contributor
+                        node_ref
+                        not in resolved_receipts
                     ):
                         errors.append(
-                            "graph receipt contributor "
-                            f"mismatch for {node_ref}: "
-                            f"expected {graph_contributor} "
-                            f"but found "
-                            f"{actual_contributor}"
+                            "graph references "
+                            "receipt not resolved "
+                            "by bundle: "
+                            f"{node_ref}"
                         )
 
                 elif (
                     node_type
-                    == "contribution_interaction"
+                    ==
+                    "contribution_interaction"
                 ):
                     if (
                         node_ref
-                        not in resolved_interactions
+                        not in
+                        resolved_interactions
                     ):
                         errors.append(
-                            "graph references interaction "
-                            "not resolved by bundle: "
+                            "graph references "
+                            "interaction not "
+                            "resolved by bundle: "
                             f"{node_ref}"
                         )
 
         errors.extend(
             validate_graph_interaction_membership(
                 graph_data=graph_data,
-                resolved_receipts=resolved_receipts,
+                resolved_receipts=(
+                    resolved_receipts
+                ),
                 resolved_interactions=(
                     resolved_interactions
                 ),
             )
         )
-
-    # -------------------------------------------------------------------
-    # Compatibility
-    # -------------------------------------------------------------------
 
     errors.extend(
         validate_bundle_compatibility(
@@ -1696,13 +2817,26 @@ def validate_bundle_cross_records(
 
 def validate_graph_interaction_membership(
     graph_data: dict[str, Any],
-    resolved_receipts: dict[str, ResolvedRecord],
-    resolved_interactions: dict[str, ResolvedRecord],
+    resolved_receipts: dict[
+        str,
+        ResolvedRecord,
+    ],
+    resolved_interactions: dict[
+        str,
+        ResolvedRecord,
+    ],
 ) -> list[str]:
     errors: list[str] = []
 
-    nodes = graph_data.get("nodes", [])
-    edges = graph_data.get("edges", [])
+    nodes = graph_data.get(
+        "nodes",
+        [],
+    )
+
+    edges = graph_data.get(
+        "edges",
+        [],
+    )
 
     if not isinstance(nodes, list):
         return errors
@@ -1718,16 +2852,28 @@ def validate_graph_interaction_membership(
 
         if (
             node.get("node_type")
-            != "contribution_interaction"
+            !=
+            "contribution_interaction"
         ):
             continue
 
-        interaction_node_id = node.get("node_id")
-        interaction_ref = node.get("ref")
+        interaction_node_id = (
+            node.get("node_id")
+        )
+
+        interaction_ref = (
+            node.get("ref")
+        )
 
         if (
-            not isinstance(interaction_node_id, str)
-            or not isinstance(interaction_ref, str)
+            not isinstance(
+                interaction_node_id,
+                str,
+            )
+            or not isinstance(
+                interaction_ref,
+                str,
+            )
         ):
             continue
 
@@ -1737,7 +2883,10 @@ def validate_graph_interaction_membership(
             )
         )
 
-        if resolved_interaction is None:
+        if (
+            resolved_interaction
+            is None
+        ):
             continue
 
         actual_members = (
@@ -1746,48 +2895,91 @@ def validate_graph_interaction_membership(
             )
         )
 
-        graph_members: set[str] = set()
-        incoming_receipt_refs: set[str] = set()
+        graph_members: set[str] = (
+            set()
+        )
+
+        incoming_receipt_refs: (
+            set[str]
+        ) = set()
 
         for edge in edges:
-            if not isinstance(edge, dict):
+            if not isinstance(
+                edge,
+                dict,
+            ):
                 continue
 
-            if edge.get("relation") != "participates_in":
+            if (
+                edge.get("relation")
+                != "participates_in"
+            ):
                 continue
 
-            if edge.get("to") != interaction_node_id:
+            if (
+                edge.get("to")
+                != interaction_node_id
+            ):
                 continue
 
-            source_id = edge.get("from")
+            source_id = edge.get(
+                "from"
+            )
 
-            if not isinstance(source_id, str):
+            if not isinstance(
+                source_id,
+                str,
+            ):
                 continue
 
-            source_node = node_map.get(source_id)
+            source_node = (
+                node_map.get(
+                    source_id
+                )
+            )
 
             if source_node is None:
                 continue
 
-            source_type = source_node.get("node_type")
+            source_type = (
+                source_node.get(
+                    "node_type"
+                )
+            )
 
-            if source_type == "contributor":
-                contributor_id = source_node.get(
-                    "contributor_id"
+            if (
+                source_type
+                == "contributor"
+            ):
+                contributor_id = (
+                    source_node.get(
+                        "contributor_id"
+                    )
                 )
 
-                if isinstance(contributor_id, str):
+                if isinstance(
+                    contributor_id,
+                    str,
+                ):
                     graph_members.add(
                         contributor_id
                     )
 
             elif (
                 source_type
-                == "contribution_receipt"
+                ==
+                "contribution_receipt"
             ):
-                receipt_ref = source_node.get("ref")
+                receipt_ref = (
+                    source_node.get(
+                        "ref"
+                    )
+                )
 
-                if not isinstance(receipt_ref, str):
+                if not isinstance(
+                    receipt_ref,
+                    str,
+                ):
                     continue
 
                 incoming_receipt_refs.add(
@@ -1800,7 +2992,10 @@ def validate_graph_interaction_membership(
                     )
                 )
 
-                if resolved_receipt is None:
+                if (
+                    resolved_receipt
+                    is None
+                ):
                     continue
 
                 contributor_id = (
@@ -1809,21 +3004,32 @@ def validate_graph_interaction_membership(
                     )
                 )
 
-                if isinstance(contributor_id, str):
+                if isinstance(
+                    contributor_id,
+                    str,
+                ):
                     graph_members.add(
                         contributor_id
                     )
 
-        if graph_members != actual_members:
-            interaction_id = record_id(
-                resolved_interaction.data
+        if (
+            graph_members
+            != actual_members
+        ):
+            interaction_id = (
+                record_id(
+                    resolved_interaction.data
+                )
             )
 
             errors.append(
-                f"interaction {interaction_id} "
-                "contributor membership mismatch: "
-                f"graph={sorted(graph_members)} "
-                f"record={sorted(actual_members)}"
+                f"interaction "
+                f"{interaction_id} "
+                "contributor membership "
+                "mismatch: graph="
+                f"{sorted(graph_members)} "
+                "record="
+                f"{sorted(actual_members)}"
             )
 
         individual_refs = (
@@ -1832,29 +3038,39 @@ def validate_graph_interaction_membership(
             )
         )
 
-        if isinstance(individual_refs, list):
-            declared_receipt_refs = {
+        if isinstance(
+            individual_refs,
+            list,
+        ):
+            declared_receipts = {
                 value
-                for value in individual_refs
-                if isinstance(value, str)
+                for value
+                in individual_refs
+                if isinstance(
+                    value,
+                    str,
+                )
             }
 
             if (
                 incoming_receipt_refs
-                and declared_receipt_refs
+                and declared_receipts
                 != incoming_receipt_refs
             ):
-                interaction_id = record_id(
-                    resolved_interaction.data
+                interaction_id = (
+                    record_id(
+                        resolved_interaction.data
+                    )
                 )
 
                 errors.append(
-                    f"interaction {interaction_id} "
-                    "receipt membership mismatch: "
-                    f"graph="
+                    f"interaction "
+                    f"{interaction_id} "
+                    "receipt membership "
+                    "mismatch: graph="
                     f"{sorted(incoming_receipt_refs)} "
-                    f"record="
-                    f"{sorted(declared_receipt_refs)}"
+                    "record="
+                    f"{sorted(declared_receipts)}"
                 )
 
     return errors
@@ -1862,30 +3078,52 @@ def validate_graph_interaction_membership(
 
 def validate_bundle_compatibility(
     bundle: dict[str, Any],
-    graph_record: ResolvedRecord | None,
-    receipt_records: list[ResolvedRecord],
-    interaction_records: list[ResolvedRecord],
+    graph_record: (
+        ResolvedRecord | None
+    ),
+    receipt_records: list[
+        ResolvedRecord
+    ],
+    interaction_records: list[
+        ResolvedRecord
+    ],
 ) -> list[str]:
     errors: list[str] = []
 
-    compatibility = bundle.get("compatibility")
+    compatibility = bundle.get(
+        "compatibility"
+    )
 
-    if not isinstance(compatibility, dict):
+    if not isinstance(
+        compatibility,
+        dict,
+    ):
         return errors
 
-    graph_versions = compatibility.get(
-        "graph_versions"
+    graph_versions = (
+        compatibility.get(
+            "graph_versions"
+        )
     )
-    receipt_versions = compatibility.get(
-        "receipt_versions"
+
+    receipt_versions = (
+        compatibility.get(
+            "receipt_versions"
+        )
     )
-    interaction_versions = compatibility.get(
-        "interaction_versions"
+
+    interaction_versions = (
+        compatibility.get(
+            "interaction_versions"
+        )
     )
 
     if (
         graph_record is not None
-        and isinstance(graph_versions, list)
+        and isinstance(
+            graph_versions,
+            list,
+        )
     ):
         version = record_version(
             graph_record.data
@@ -1893,46 +3131,574 @@ def validate_bundle_compatibility(
 
         if version not in graph_versions:
             errors.append(
-                f"incompatible graph version: {version}"
+                "incompatible graph "
+                f"version: {version}"
             )
 
-    if isinstance(receipt_versions, list):
+    if isinstance(
+        receipt_versions,
+        list,
+    ):
         for record in receipt_records:
-            version = record_version(record.data)
+            version = record_version(
+                record.data
+            )
 
-            if version not in receipt_versions:
+            if (
+                version
+                not in receipt_versions
+            ):
                 errors.append(
-                    "incompatible receipt version: "
-                    f"{version}"
+                    "incompatible receipt "
+                    f"version: {version}"
                 )
 
-    if isinstance(interaction_versions, list):
-        for record in interaction_records:
-            version = record_version(record.data)
+    if isinstance(
+        interaction_versions,
+        list,
+    ):
+        for record in (
+            interaction_records
+        ):
+            version = record_version(
+                record.data
+            )
 
-            if version not in interaction_versions:
+            if (
+                version
+                not in
+                interaction_versions
+            ):
                 errors.append(
-                    "incompatible interaction version: "
+                    "incompatible "
+                    "interaction version: "
                     f"{version}"
                 )
 
     return errors
 
 
+# ============================================================
+# v0.5 WEIGHT CROSS-RECORD
+# ============================================================
+
+
+def ref_entry_map(
+    entries: Any,
+) -> dict[str, dict[str, Any]]:
+    result: dict[
+        str,
+        dict[str, Any],
+    ] = {}
+
+    if not isinstance(entries, list):
+        return result
+
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+
+        ref = entry.get("ref")
+
+        if isinstance(ref, str):
+            result[ref] = entry
+
+    return result
+
+
+def validate_weight_cross_records(
+    assessment: dict[str, Any],
+    resolver: RecordResolver,
+) -> list[str]:
+    errors: list[str] = []
+
+    bundle_ref_block = (
+        assessment.get(
+            "bundle_ref",
+            {},
+        )
+    )
+
+    if not isinstance(
+        bundle_ref_block,
+        dict,
+    ):
+        return [
+            "weight assessment "
+            "bundle_ref is invalid"
+        ]
+
+    bundle_ref = (
+        bundle_ref_block.get(
+            "ref"
+        )
+    )
+
+    if not isinstance(
+        bundle_ref,
+        str,
+    ):
+        return [
+            "weight assessment "
+            "bundle_ref.ref is invalid"
+        ]
+
+    resolved_bundle = (
+        resolver.resolve(
+            bundle_ref
+        )
+    )
+
+    if resolved_bundle is None:
+        return [
+            "unresolved contribution "
+            f"bundle reference: "
+            f"{bundle_ref}"
+        ]
+
+    bundle = resolved_bundle.data
+
+    if not isinstance(bundle, dict):
+        return [
+            "resolved contribution "
+            "bundle is not an object"
+        ]
+
+    if (
+        bundle.get("protocol")
+        !=
+        "causal-contribution-bundle"
+    ):
+        errors.append(
+            "weight assessment "
+            "bundle_ref resolved to "
+            "unexpected protocol: "
+            f"{bundle.get('protocol')}"
+        )
+
+        return errors
+
+    declared_bundle_id = (
+        bundle_ref_block.get(
+            "bundle_id"
+        )
+    )
+
+    actual_bundle_id = (
+        bundle.get("bundle_id")
+    )
+
+    if (
+        isinstance(
+            declared_bundle_id,
+            str,
+        )
+        and declared_bundle_id
+        != actual_bundle_id
+    ):
+        errors.append(
+            "weight assessment "
+            "bundle identity mismatch: "
+            f"expected "
+            f"{declared_bundle_id} "
+            f"but resolved "
+            f"{actual_bundle_id}"
+        )
+
+    declared_version = (
+        bundle_ref_block.get(
+            "protocol_version"
+        )
+    )
+
+    actual_version = bundle.get(
+        "protocol_version"
+    )
+
+    if (
+        isinstance(
+            declared_version,
+            str,
+        )
+        and declared_version
+        != actual_version
+    ):
+        errors.append(
+            "weight assessment "
+            "bundle version mismatch: "
+            f"expected "
+            f"{declared_version} "
+            f"but found "
+            f"{actual_version}"
+        )
+
+    digest_error = (
+        validate_declared_digest(
+            bundle_ref_block,
+            resolved_bundle,
+        )
+    )
+
+    if digest_error is not None:
+        errors.append(
+            digest_error
+        )
+
+    assessment_outcome = (
+        assessment.get(
+            "outcome_ref",
+            {},
+        )
+    )
+
+    bundle_outcome = (
+        bundle.get(
+            "outcome_ref",
+            {},
+        )
+    )
+
+    assessment_outcome_id = (
+        assessment_outcome.get(
+            "outcome_id"
+        )
+        if isinstance(
+            assessment_outcome,
+            dict,
+        )
+        else None
+    )
+
+    bundle_outcome_id = (
+        bundle_outcome.get(
+            "outcome_id"
+        )
+        if isinstance(
+            bundle_outcome,
+            dict,
+        )
+        else None
+    )
+
+    if (
+        isinstance(
+            assessment_outcome_id,
+            str,
+        )
+        and assessment_outcome_id
+        != bundle_outcome_id
+    ):
+        errors.append(
+            "weight assessment "
+            "outcome mismatch: "
+            f"expected "
+            f"{assessment_outcome_id} "
+            "but referenced bundle "
+            "contains "
+            f"{bundle_outcome_id}"
+        )
+
+    receipt_entries = ref_entry_map(
+        bundle.get(
+            "receipt_refs",
+            [],
+        )
+    )
+
+    interaction_entries = (
+        ref_entry_map(
+            bundle.get(
+                "interaction_refs",
+                [],
+            )
+        )
+    )
+
+    bundle_contributors = {
+        entry.get("contributor_id")
+        for entry
+        in receipt_entries.values()
+        if isinstance(
+            entry.get(
+                "contributor_id"
+            ),
+            str,
+        )
+    }
+
+    weights = assessment.get(
+        "weights",
+        [],
+    )
+
+    if isinstance(weights, list):
+        for weight in weights:
+            if not isinstance(
+                weight,
+                dict,
+            ):
+                continue
+
+            weight_id = weight.get(
+                "weight_id",
+                "<unknown>",
+            )
+
+            subject_ref = weight.get(
+                "subject_ref"
+            )
+
+            subject_type = weight.get(
+                "subject_type"
+            )
+
+            contributor_id = (
+                weight.get(
+                    "contributor_id"
+                )
+            )
+
+            if not isinstance(
+                subject_ref,
+                str,
+            ):
+                continue
+
+            if (
+                subject_type
+                == "contribution_receipt"
+            ):
+                receipt_entry = (
+                    receipt_entries.get(
+                        subject_ref
+                    )
+                )
+
+                if receipt_entry is None:
+                    errors.append(
+                        f"{weight_id}: "
+                        "contribution receipt "
+                        "subject is not present "
+                        "in referenced bundle: "
+                        f"{subject_ref}"
+                    )
+
+                    continue
+
+                bundle_contributor = (
+                    receipt_entry.get(
+                        "contributor_id"
+                    )
+                )
+
+                if (
+                    isinstance(
+                        contributor_id,
+                        str,
+                    )
+                    and isinstance(
+                        bundle_contributor,
+                        str,
+                    )
+                    and contributor_id
+                    != bundle_contributor
+                ):
+                    errors.append(
+                        f"{weight_id}: "
+                        "contributor mismatch: "
+                        f"expected "
+                        f"{bundle_contributor} "
+                        f"but found "
+                        f"{contributor_id}"
+                    )
+
+            elif (
+                subject_type
+                ==
+                "contribution_interaction"
+            ):
+                if (
+                    subject_ref
+                    not in
+                    interaction_entries
+                ):
+                    errors.append(
+                        f"{weight_id}: "
+                        "contribution interaction "
+                        "subject is not present "
+                        "in referenced bundle: "
+                        f"{subject_ref}"
+                    )
+
+            elif (
+                subject_type
+                == "contributor"
+            ):
+                if not isinstance(
+                    contributor_id,
+                    str,
+                ):
+                    errors.append(
+                        f"{weight_id}: "
+                        "contributor subject "
+                        "requires contributor_id"
+                    )
+
+                elif (
+                    contributor_id
+                    not in
+                    bundle_contributors
+                ):
+                    errors.append(
+                        f"{weight_id}: "
+                        "contributor is not "
+                        "represented by the "
+                        "referenced bundle: "
+                        f"{contributor_id}"
+                    )
+
+    bundle_assessment = (
+        bundle.get(
+            "bundle_assessment",
+            {},
+        )
+    )
+
+    bundle_has_unresolved = False
+
+    if isinstance(
+        bundle_assessment,
+        dict,
+    ):
+        unresolved_count = (
+            bundle_assessment.get(
+                "unresolved_reference_count"
+            )
+        )
+
+        reference_coverage = (
+            bundle_assessment.get(
+                "reference_coverage"
+            )
+        )
+
+        if (
+            isinstance(
+                unresolved_count,
+                int,
+            )
+            and unresolved_count > 0
+        ):
+            bundle_has_unresolved = (
+                True
+            )
+
+        if (
+            isinstance(
+                reference_coverage,
+                (int, float),
+            )
+            and float(
+                reference_coverage
+            )
+            < 1.0 - EPSILON
+        ):
+            bundle_has_unresolved = (
+                True
+            )
+
+    unresolved_weight = (
+        assessment.get(
+            "unresolved_weight"
+        )
+    )
+
+    if (
+        bundle_has_unresolved
+        and isinstance(
+            unresolved_weight,
+            (int, float),
+        )
+        and float(
+            unresolved_weight
+        )
+        <= EPSILON
+    ):
+        errors.append(
+            "unresolved contribution "
+            "forced to zero while "
+            "referenced bundle contains "
+            "unresolved causal evidence"
+        )
+
+    return errors
+
+
+# ============================================================
+# CROSS-RECORD ROUTING
+# ============================================================
+
+
+def run_cross_record_validation(
+    protocol: str,
+    data: dict[str, Any],
+    resolver: RecordResolver,
+) -> list[str]:
+    if (
+        protocol
+        == "causal-contribution-bundle"
+    ):
+        return (
+            validate_bundle_cross_records(
+                data,
+                resolver,
+            )
+        )
+
+    if (
+        protocol
+        ==
+        "causal-contribution-weight-assessment"
+    ):
+        return (
+            validate_weight_cross_records(
+                data,
+                resolver,
+            )
+        )
+
+    return []
+
+
+def protocol_has_cross_record_validation(
+    protocol: str,
+) -> bool:
+    return protocol in {
+        "causal-contribution-bundle",
+        "causal-contribution-weight-assessment",
+    }
+
+
 def print_cross_record_errors(
     errors: list[str],
 ) -> None:
     for error in errors:
-        print(f"[cross-record-error] {error}")
+        print(
+            "[cross-record-error] "
+            f"{error}"
+        )
 
 
-# ---------------------------------------------------------------------------
-# PASS validation
-# ---------------------------------------------------------------------------
+# ============================================================
+# PASS EXAMPLES
+# ============================================================
 
 
 def validate_pass_examples(
-    validators: dict[str, Draft202012Validator],
+    validators: dict[
+        str,
+        Draft202012Validator,
+    ],
     resolver: RecordResolver,
 ) -> tuple[int, int]:
     total = 0
@@ -1941,72 +3707,108 @@ def validate_pass_examples(
     print()
     print("=== PASS EXAMPLES ===")
 
-    files = sorted(PASS_DIR.glob("*.yaml"))
+    files = sorted(
+        PASS_DIR.glob("*.yaml")
+    )
 
     if not files:
-        print("[warning] no pass examples found")
-        return total, failures
+        print(
+            "[warning] no pass "
+            "examples found"
+        )
+
+        return (
+            total,
+            failures,
+        )
 
     for path in files:
         total += 1
 
-        relative_path = path.relative_to(
-            REPO_ROOT
+        relative_path = (
+            path.relative_to(
+                REPO_ROOT
+            )
         )
 
         print()
-        print(f"[validate-pass] {relative_path}")
+        print(
+            f"[validate-pass] "
+            f"{relative_path}"
+        )
 
         try:
             data = load_yaml(path)
         except Exception as exc:
             failures += 1
-            print(f"[yaml-error] {exc}")
+
+            print(
+                f"[yaml-error] {exc}"
+            )
+
             continue
 
-        protocol, schema_validator = (
-            resolve_validator(
-                data,
-                validators,
-            )
+        (
+            protocol,
+            schema_validator,
+        ) = resolve_validator(
+            data,
+            validators,
         )
 
         if protocol is None:
             failures += 1
+
             print(
-                "[routing-error] missing or invalid "
+                "[routing-error] "
+                "missing or invalid "
                 "protocol identifier"
             )
+
             continue
 
         if schema_validator is None:
             failures += 1
+
             print(
-                "[routing-error] unsupported protocol: "
+                "[routing-error] "
+                "unsupported protocol: "
                 f"{protocol}"
             )
+
             continue
 
-        print(f"[protocol] {protocol}")
+        print(
+            f"[protocol] {protocol}"
+        )
 
-        schema_errors = collect_schema_errors(
-            schema_validator,
-            data,
+        schema_errors = (
+            collect_schema_errors(
+                schema_validator,
+                data,
+            )
         )
 
         if schema_errors:
             failures += 1
-            print_schema_errors(schema_errors)
+
+            print_schema_errors(
+                schema_errors
+            )
+
             continue
 
         print("[schema-ok]")
 
         if not isinstance(data, dict):
             failures += 1
+
             print(
                 "[semantic-error] "
-                "document root must be an object"
+                "document root must "
+                "be an object"
             )
+
             continue
 
         semantic_errors = (
@@ -2018,19 +3820,23 @@ def validate_pass_examples(
 
         if semantic_errors:
             failures += 1
+
             print_semantic_errors(
                 semantic_errors
             )
+
             continue
 
         print("[semantic-ok]")
 
         if (
-            protocol
-            == "causal-contribution-bundle"
+            protocol_has_cross_record_validation(
+                protocol
+            )
         ):
             cross_errors = (
-                validate_bundle_cross_records(
+                run_cross_record_validation(
+                    protocol,
                     data,
                     resolver,
                 )
@@ -2038,25 +3844,39 @@ def validate_pass_examples(
 
             if cross_errors:
                 failures += 1
+
                 print_cross_record_errors(
                     cross_errors
                 )
+
                 continue
 
             print("[cross-record-ok]")
 
-    return total, failures
+    return (
+        total,
+        failures,
+    )
 
 
-# ---------------------------------------------------------------------------
-# FAIL validation
-# ---------------------------------------------------------------------------
+# ============================================================
+# FAIL EXAMPLES
+# ============================================================
 
 
 def validate_fail_examples(
-    validators: dict[str, Draft202012Validator],
+    validators: dict[
+        str,
+        Draft202012Validator,
+    ],
     resolver: RecordResolver,
-) -> tuple[int, int, int, int, int]:
+) -> tuple[
+    int,
+    int,
+    int,
+    int,
+    int,
+]:
     total = 0
     harness_failures = 0
 
@@ -2067,61 +3887,87 @@ def validate_fail_examples(
     print()
     print("=== FAIL EXAMPLES ===")
 
-    files = sorted(FAIL_DIR.glob("*.yaml"))
+    files = sorted(
+        FAIL_DIR.glob("*.yaml")
+    )
 
     for path in files:
         total += 1
 
-        relative_path = path.relative_to(
-            REPO_ROOT
+        relative_path = (
+            path.relative_to(
+                REPO_ROOT
+            )
         )
 
         print()
-        print(f"[validate-fail] {relative_path}")
+        print(
+            f"[validate-fail] "
+            f"{relative_path}"
+        )
 
         try:
             data = load_yaml(path)
         except Exception as exc:
             harness_failures += 1
+
             print(
-                "[yaml-error] invalid YAML prevents "
+                "[yaml-error] "
+                "invalid YAML prevents "
                 f"validation: {exc}"
             )
+
             continue
 
-        protocol, schema_validator = (
-            resolve_validator(
-                data,
-                validators,
-            )
+        (
+            protocol,
+            schema_validator,
+        ) = resolve_validator(
+            data,
+            validators,
         )
 
         if protocol is None:
             harness_failures += 1
+
             print(
-                "[routing-error] missing or invalid "
+                "[routing-error] "
+                "missing or invalid "
                 "protocol identifier"
             )
+
             continue
 
         if schema_validator is None:
             harness_failures += 1
+
             print(
-                "[routing-error] unsupported protocol: "
+                "[routing-error] "
+                "unsupported protocol: "
                 f"{protocol}"
             )
+
             continue
 
-        print(f"[protocol] {protocol}")
+        print(
+            f"[protocol] {protocol}"
+        )
 
-        schema_errors = collect_schema_errors(
-            schema_validator,
-            data,
+        schema_errors = (
+            collect_schema_errors(
+                schema_validator,
+                data,
+            )
         )
 
         if schema_errors:
-            print_schema_errors(schema_errors)
-            print("[expected-schema-failure]")
+            print_schema_errors(
+                schema_errors
+            )
+
+            print(
+                "[expected-schema-failure]"
+            )
 
             expected_schema_failures += 1
             continue
@@ -2130,10 +3976,13 @@ def validate_fail_examples(
 
         if not isinstance(data, dict):
             harness_failures += 1
+
             print(
                 "[semantic-error] "
-                "document root must be an object"
+                "document root must "
+                "be an object"
             )
+
             continue
 
         semantic_errors = (
@@ -2158,11 +4007,13 @@ def validate_fail_examples(
         print("[semantic-ok]")
 
         if (
-            protocol
-            == "causal-contribution-bundle"
+            protocol_has_cross_record_validation(
+                protocol
+            )
         ):
             cross_errors = (
-                validate_bundle_cross_records(
+                run_cross_record_validation(
+                    protocol,
                     data,
                     resolver,
                 )
@@ -2186,7 +4037,8 @@ def validate_fail_examples(
 
         print(
             "[unexpected-pass] "
-            "example was expected to fail validation"
+            "example was expected "
+            "to fail validation"
         )
 
     return (
@@ -2198,9 +4050,9 @@ def validate_fail_examples(
     )
 
 
-# ---------------------------------------------------------------------------
-# Summary
-# ---------------------------------------------------------------------------
+# ============================================================
+# SUMMARY
+# ============================================================
 
 
 def print_summary(
@@ -2212,7 +4064,10 @@ def print_summary(
     expected_semantic_failures: int,
     expected_cross_record_failures: int,
 ) -> int:
-    total_examples = pass_total + fail_total
+    total_examples = (
+        pass_total
+        + fail_total
+    )
 
     total_failures = (
         pass_failures
@@ -2223,15 +4078,18 @@ def print_summary(
     print("=== SUMMARY ===")
 
     print(
-        f"pass examples checked: {pass_total}"
+        "pass examples checked: "
+        f"{pass_total}"
     )
 
     print(
-        f"fail examples checked: {fail_total}"
+        "fail examples checked: "
+        f"{fail_total}"
     )
 
     print(
-        f"total examples checked: {total_examples}"
+        "total examples checked: "
+        f"{total_examples}"
     )
 
     print(
@@ -2255,39 +4113,47 @@ def print_summary(
     )
 
     if total_failures:
-        print("[validation-failed]")
+        print(
+            "[validation-failed]"
+        )
+
         return 1
 
     print("[validation-ok]")
 
     print(
-        "All pass examples validated successfully, "
-        "and all fail examples were rejected at the "
-        "expected validation layer."
+        "All pass examples validated "
+        "successfully, and all fail "
+        "examples were rejected at "
+        "the expected validation layer."
     )
 
     return 0
 
 
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
+# ============================================================
+# MAIN
+# ============================================================
 
 
 def main() -> int:
     print(
-        "=== Causal Contribution Receipt Protocol "
-        "Validation ==="
+        "=== Causal Contribution "
+        "Receipt Protocol Validation ==="
     )
 
     validators = load_validators()
-    resolver = load_record_resolver()
 
-    pass_total, pass_failures = (
-        validate_pass_examples(
-            validators,
-            resolver,
-        )
+    resolver = (
+        load_record_resolver()
+    )
+
+    (
+        pass_total,
+        pass_failures,
+    ) = validate_pass_examples(
+        validators,
+        resolver,
     )
 
     (
@@ -2321,5 +4187,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
-
+    raise SystemExit(
+        main()
+    )
