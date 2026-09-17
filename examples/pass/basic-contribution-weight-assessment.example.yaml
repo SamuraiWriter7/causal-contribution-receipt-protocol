@@ -1,0 +1,73 @@
+protocol: causal-contribution-weight-assessment
+protocol_version: "0.5"
+
+assessment_id: weight-assessment-501
+
+outcome_ref:
+  outcome_id: outcome-401
+  outcome_type: research_answer
+  outcome_ref: trace://outcomes/outcome-401
+
+bundle_ref:
+  ref: trace://contribution-bundles/bundle-001
+  bundle_id: bundle-001
+  protocol_version: "0.4"
+
+method:
+  type: evidence_weighted
+  description: >
+    Estimate relative contribution weight from causal impact,
+    necessity, quality impact, and evidence strength recorded
+    in the validated contribution bundle.
+
+weights:
+  - weight_id: weight-501-a
+    subject_ref: trace://contribution-receipts/ccr-0401
+    subject_type: contribution_receipt
+    contributor_id: agent-retriever-401
+
+    estimated_weight: 0.34
+    lower_bound: 0.28
+    upper_bound: 0.40
+    confidence: 0.91
+
+    evidence_refs:
+      - trace://contribution-receipts/ccr-0401
+      - trace://evidence/retrieval-run-401
+
+    basis:
+      causal_impact: 0.67
+      necessity: 0.61
+      quality_impact: 0.64
+      evidence_strength: 0.94
+
+  - weight_id: weight-501-b
+    subject_ref: trace://contribution-receipts/ccr-0402
+    subject_type: contribution_receipt
+    contributor_id: agent-verifier-401
+
+    estimated_weight: 0.46
+    lower_bound: 0.39
+    upper_bound: 0.53
+    confidence: 0.95
+
+    evidence_refs:
+      - trace://contribution-receipts/ccr-0402
+      - trace://evidence/verification-run-401
+
+    basis:
+      causal_impact: 0.79
+      necessity: 0.73
+      quality_impact: 0.88
+      evidence_strength: 0.96
+
+unresolved_weight: 0.20
+
+assessment_summary:
+  known_weight: 0.80
+  subject_count: 2
+  interaction_subject_count: 0
+  confidence: 0.93
+  uncertainty_note: >
+    Twenty percent of total contribution weight remains unresolved
+    rather than being redistributed across the known contributors.
