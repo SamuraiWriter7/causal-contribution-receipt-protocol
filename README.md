@@ -1,4 +1,3 @@
-````markdown
 # causal-contribution-receipt-protocol
 
 A machine-readable protocol for tracing and evaluating causal contribution across humans, AI agents, data, and evidence for auditable attribution and value allocation.
@@ -1210,7 +1209,4 @@ Cross-record validation tells us whether the records agree.
 Weight tells us how much relative contribution the evidence supports.
 
 Downstream systems decide what rights or payments follow.
-```
 
-```
-```
